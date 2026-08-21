@@ -1,0 +1,15 @@
+{
+  "name": "TheAICraftify",
+  "short_name": "AICraftify",
+  "start_url": "/theaicraftify/",
+  "display": "standalone",
+  "background_color": "#080b12",
+  "theme_color": "#080b12",
+  "icons": [
+    {
+      "src": "logo_tech_icon-1.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
