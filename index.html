@@ -1,461 +1,422 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><link rel="manifest" href="manifest.json">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TheAIcraftify — Building My Future With AI</title>
-  <meta name="description" content="Self-taught AI & Web Developer documenting a public 90-day journey from learning to building real-world AI and web projects." />
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ============================================
-       Open Graph tags: control how this page looks
-       when shared on Instagram, WhatsApp, etc.
-  ============================================ -->
-  <meta property="og:title" content="TheAIcraftify — Building My Future With AI" />
-  <meta property="og:description" content="Self-taught AI & Web Developer. Building in public. Learning AI. Creating real projects." />
-  <meta property="og:type" content="website" />
+<title>The AI craftify</title>
 
-  <!-- Fonts: Space Grotesk (headlines), Inter (body text), JetBrains Mono (code/labels) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-  <link rel="stylesheet" href="styles.css" />
+body{
+  font-family:Arial,sans-serif;
+  background:#080a0f;
+  color:#f2f4f8;
+  min-height:100vh;
+  line-height:1.6;
+}
 
-  <!-- Simple favicon made of text, no image file needed -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230B0D10%22/><text x=%2250%22 y=%2266%22 font-size=%2258%22 font-family=%22monospace%22 fill=%22%236E8FFF%22 text-anchor=%22middle%22>A</text></svg>" />
-<meta name="google-site-verification" content="b38x3EnX7g7BPzuW4kQYJV058WB2uo7cEOZw0bbnep8" /></head>
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(100,120,150,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(100,120,150,.07) 1px,transparent 1px);
+  background-size:86px 86px;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.container{
+  width:min(1000px,92%);
+  margin:auto;
+}
+
+header{
+  border-bottom:1px solid #252a31;
+  padding:22px 0;
+  position:sticky;
+  top:0;
+  background:rgba(8,10,15,.95);
+  backdrop-filter:blur(10px);
+  z-index:10;
+}
+
+.nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:25px;
+  font-weight:bold;
+}
+
+.logo img{
+  width:48px;
+  height:48px;
+  object-fit:contain;
+}
+
+.ai{
+  color:#6ee7ff;
+}
+
+.menu{
+  font-size:32px;
+  color:#fff;
+}
+
+.hero{
+  text-align:center;
+  padding:90px 0 55px;
+}
+
+.badge{
+  display:inline-block;
+  padding:8px 18px;
+  border:1px solid #d49a38;
+  border-radius:30px;
+  color:#e7b35a;
+  font-family:monospace;
+  margin-bottom:25px;
+}
+
+.hero h1{
+  font-size:clamp(42px,8vw,76px);
+  line-height:1.05;
+  margin-bottom:22px;
+}
+
+.hero p{
+  max-width:700px;
+  margin:auto;
+  color:#9ba3b2;
+  font-size:19px;
+}
+
+.section-title{
+  font-size:32px;
+  margin:30px 0 22px;
+}
+
+.project{
+  background:#12161d;
+  border:1px solid #283039;
+  border-radius:20px;
+  padding:30px;
+  margin:22px 0;
+  position:relative;
+}
+
+.project:before{
+  content:"";
+  position:absolute;
+  left:-1px;
+  top:-1px;
+  width:25px;
+  height:25px;
+  border-left:1px solid #6e7fff;
+  border-top:1px solid #6e7fff;
+  border-radius:20px 0 0 0;
+}
+
+.project-number{
+  color:#777f91;
+  font-family:monospace;
+  margin-bottom:8px;
+}
+
+.status{
+  float:right;
+  border:1px solid #d49a38;
+  color:#e7b35a;
+  padding:5px 13px;
+  border-radius:20px;
+  font-family:monospace;
+}
+
+.project h3{
+  font-size:30px;
+  margin:15px 0;
+}
+
+.project p{
+  color:#9ba3b2;
+  font-size:17px;
+  max-width:700px;
+}
+
+.tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:20px 0;
+}
+
+.tag{
+  background:#1d2743;
+  color:#7e91ff;
+  padding:7px 14px;
+  border-radius:25px;
+  font-family:monospace;
+}
+
+.buttons{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  display:inline-block;
+  padding:14px 25px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:bold;
+  font-size:16px;
+}
+
+.primary{
+  background:#6e8cff;
+  color:#080a0f;
+}
+
+.secondary{
+  border:1px solid #303741;
+  color:#fff;
+}
+
+.about{
+  margin-top:50px;
+  background:#11151b;
+  border:1px solid #283039;
+  border-radius:20px;
+  padding:30px;
+}
+
+.about p{
+  color:#9ba3b2;
+  margin-top:12px;
+}
+
+footer{
+  text-align:center;
+  padding:55px 0 35px;
+  color:#68727c;
+}
+
+footer span{
+  color:#6e8cff;
+}
+
+@media(max-width:600px){
+
+  .hero{
+    padding-top:65px;
+  }
+
+  .hero h1{
+    font-size:45px;
+  }
+
+  .hero p{
+    font-size:17px;
+  }
+
+  .project{
+    padding:25px;
+  }
+
+  .project h3{
+    font-size:26px;
+  }
+
+  .status{
+    float:none;
+    display:inline-block;
+    margin-bottom:8px;
+  }
+
+  .btn{
+    width:100%;
+    text-align:center;
+  }
+}
+</style>
+</head>
+
 <body>
 
-  <!-- ============================================
-       BLUEPRINT GRID BACKGROUND
-       A fixed, full-page grid of faint lines that gives
-       the whole site its "schematic / blueprint" feel.
-       Purely decorative, sits behind everything.
-  ============================================ -->
-  <div class="blueprint-grid" aria-hidden="true"></div>
+<header>
+  <div class="container nav">
 
-  <!-- ============================================
-       NAVIGATION
-  ============================================ -->
-  <header class="nav" id="top">
-    <div class="nav-inner">
-      <a href="#top" class="nav-logo">
-      <img src="logo_tech_icon-1.png" alt="The AICraftify Logo" style="width:38px;height:38px;object-fit:contain;">
-The<span class="accent-text">AI</span>craftify
-      </a>
-        
-
-      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-
-      <nav class="nav-links" id="navLinks">
-        <a href="#about">About</a>
-        <a href="#roadmap">Roadmap</a>
-        <a href="#projects">Projects</a>
-        <a href="#skills">Skills</a>
-        <a href="#log">Log</a>
-        <a href="#contact" class="nav-cta">Let's Talk</a>
-      </nav>
+    <div class="logo">
+      <img src="logo_tech_icon-1.png" alt="The AI craftify">
+      <span>The <span class="ai">AI</span> craftify</span>
     </div>
-  </header>
 
-  <main>
-    <!-- ============================================
-         1. HERO SECTION
-    ============================================ -->
-    <section class="hero" id="hero">
-      <div class="hero-inner">
+    <div class="menu">☰</div>
 
-        <div class="status-badge">
-          <span class="status-dot"></span>
-          Currently Learning &bull; AI + Web Development
-        </div>
+  </div>
+</header>
 
-        <h1 class="hero-title">
-          Building My Future<br />
-          With <span class="accent-text">AI.</span>
-        </h1>
+<main class="container">
 
-        <p class="hero-sub">
-          Self-taught AI &amp; Web Developer documenting the journey from learning
-          to building real-world products.
-        </p>
+  <section class="hero">
 
-        <!-- Terminal-style line that "types" out rotating status messages.
-             This is the signature visual moment of the hero. -->
-        <div class="hero-terminal" aria-hidden="true">
-          <span class="hero-terminal-prompt">$</span>
-          <span class="hero-terminal-text" id="terminalText"></span><span class="hero-terminal-cursor">&#9608;</span>
-        </div>
+    <div class="badge">
+      90-DAY AI + WEB DEVELOPMENT JOURNEY
+    </div>
 
-        <div class="hero-actions">
-          <a href="#projects" class="btn btn-primary">View My Projects</a>
-          <a href="#instagram" class="btn btn-ghost">Follow My Journey</a>
-        </div>
+    <h1>
+      Building My Future<br>
+      With <span class="ai">AI.</span>
+    </h1>
+
+    <p>
+      A public journey of learning AI, web development,
+      automation and building real digital projects from scratch.
+    </p>
+
+  </section>
+
+
+  <section>
+
+    <h2 class="section-title">Projects</h2>
+
+
+    <!-- PROJECT 01 -->
+
+    <div class="project">
+
+      <div class="status">LIVE</div>
+
+      <div class="project-number">
+        PROJECT 01
       </div>
-    </section>
 
-    <!-- ============================================
-         2. ABOUT SECTION
-    ============================================ -->
-    <section class="section" id="about">
-      <div class="section-inner">
-        <p class="eyebrow">// 01 — about</p>
-        <h2 class="section-title">Why TheAIcraftify?</h2>
+      <h3>AI Idea Generator</h3>
 
-        <div class="about-grid">
-          <p class="about-text">
-            TheAIcraftify is a public build log, not a finished resume. I'm a
-            self-taught developer with limited formal education, learning AI,
-            web development, app development and automation mostly through
-            AI-assisted tools, documentation and trial and error.
-          </p>
-          <p class="about-text">
-            I'm not claiming to be an expert. I'm someone who decided to learn
-            in public, ship real (small) projects instead of only watching
-            tutorials, and treat every mistake as part of the record. This
-            site is where that consistency gets tracked — day by day, project
-            by project.
-          </p>
-        </div>
+      <p>
+        A rule-based AI concept generator that turns a business
+        type, problem and target customer into a complete starter
+        business concept with features, technology, earning model
+        and development roadmap.
+      </p>
 
-        <div class="about-pillars">
-          <div class="pillar">
-            <span class="pillar-icon">AI</span>
-            <p>Artificial Intelligence</p>
-          </div>
-          <div class="pillar">
-            <span class="pillar-icon">&lt;/&gt;</span>
-            <p>Web Development</p>
-          </div>
-          <div class="pillar">
-            <span class="pillar-icon">&#9673;</span>
-            <p>App Development</p>
-          </div>
-          <div class="pillar">
-            <span class="pillar-icon">&#9889;</span>
-            <p>Automation</p>
-          </div>
-          <div class="pillar">
-            <span class="pillar-icon">&#9733;</span>
-            <p>Real Projects</p>
-          </div>
-        </div>
+      <div class="tags">
+        <span class="tag">AI</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">HTML</span>
+        <span class="tag">Concept</span>
       </div>
-    </section>
 
-    <!-- ============================================
-         3. 90-DAY ROADMAP
-    ============================================ -->
-    <section class="section" id="roadmap">
-      <div class="section-inner">
-        <p class="eyebrow">// 02 — the build</p>
-        <h2 class="section-title">My 90-Day AI Developer Challenge</h2>
-        <p class="section-lead">
-          A public, self-directed curriculum. Progress below is tracked live in
-          this browser — tick off tasks as they're finished.
-        </p>
+      <div class="buttons">
 
-        <!-- Progress control: day counter + bar -->
-        <div class="progress-panel">
-          <div class="progress-panel-top">
-            <span class="progress-label">PROGRESS</span>
-            <div class="day-control">
-              <button id="dayMinus" class="day-btn" aria-label="Decrease day">&minus;</button>
-              <span class="day-readout"><span id="dayCurrent">1</span> / 90</span>
-              <button id="dayPlus" class="day-btn" aria-label="Increase day">&plus;</button>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-        </div>
-
-        <!-- Circuit-path roadmap: three phases connected like a build pipeline -->
-        <div class="roadmap-path">
-
-          <article class="phase phase-1" data-phase="1">
-            <div class="phase-node">01</div>
-            <div class="phase-card">
-              <span class="phase-range">DAYS 1&ndash;30</span>
-              <h3 class="phase-title">Foundation</h3>
-              <ul class="task-list" data-phase-tasks="1">
-                <li><label><input type="checkbox" data-task="p1-1" /><span>HTML</span></label></li>
-                <li><label><input type="checkbox" data-task="p1-2" /><span>CSS</span></label></li>
-                <li><label><input type="checkbox" data-task="p1-3" /><span>JavaScript fundamentals</span></label></li>
-                <li><label><input type="checkbox" data-task="p1-4" /><span>Basic English for technology</span></label></li>
-                <li><label><input type="checkbox" data-task="p1-5" /><span>Git / GitHub</span></label></li>
-                <li><label><input type="checkbox" data-task="p1-6" /><span>AI-assisted coding</span></label></li>
-                <li><label><input type="checkbox" data-task="p1-7" /><span>Build first responsive website</span></label></li>
-              </ul>
-            </div>
-          </article>
-
-          <article class="phase phase-2" data-phase="2">
-            <div class="phase-node">02</div>
-            <div class="phase-card">
-              <span class="phase-range">DAYS 31&ndash;60</span>
-              <h3 class="phase-title">Building</h3>
-              <ul class="task-list" data-phase-tasks="2">
-                <li><label><input type="checkbox" data-task="p2-1" /><span>JavaScript, deeper concepts</span></label></li>
-                <li><label><input type="checkbox" data-task="p2-2" /><span>APIs</span></label></li>
-                <li><label><input type="checkbox" data-task="p2-3" /><span>Python fundamentals</span></label></li>
-                <li><label><input type="checkbox" data-task="p2-4" /><span>AI APIs</span></label></li>
-                <li><label><input type="checkbox" data-task="p2-5" /><span>Build AI-powered mini tools</span></label></li>
-                <li><label><input type="checkbox" data-task="p2-6" /><span>Build 2&ndash;3 real projects</span></label></li>
-              </ul>
-            </div>
-          </article>
-
-          <article class="phase phase-3" data-phase="3">
-            <div class="phase-node">03</div>
-            <div class="phase-card">
-              <span class="phase-range">DAYS 61&ndash;90</span>
-              <h3 class="phase-title">Portfolio &amp; Real World</h3>
-              <ul class="task-list" data-phase-tasks="3">
-                <li><label><input type="checkbox" data-task="p3-1" /><span>Build polished projects</span></label></li>
-                <li><label><input type="checkbox" data-task="p3-2" /><span>Create developer portfolio</span></label></li>
-                <li><label><input type="checkbox" data-task="p3-3" /><span>Improve UI/UX</span></label></li>
-                <li><label><input type="checkbox" data-task="p3-4" /><span>Learn deployment</span></label></li>
-                <li><label><input type="checkbox" data-task="p3-5" /><span>Publish projects</span></label></li>
-                <li><label><input type="checkbox" data-task="p3-6" /><span>Approach small businesses</span></label></li>
-                <li><label><input type="checkbox" data-task="p3-7" /><span>Document progress publicly</span></label></li>
-                <li><label><input type="checkbox" data-task="p3-8" /><span>Look for freelance / internship work</span></label></li>
-              </ul>
-            </div>
-          </article>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         4. PROJECTS SECTION
-    ============================================ -->
-    <section class="section" id="projects">
-      <div class="section-inner">
-        <p class="eyebrow">// 03 — the work</p>
-        <h2 class="section-title">Things I'm Building</h2>
-        <p class="section-lead">
-          Concept-stage and in-progress projects. Replace these with your real
-          work as it ships — see the README for exactly where to edit.
-        </p>
-
-        <div class="project-grid">
-
-          <article class="project-card">
-            <span class="project-status">Coming Soon</span>
-            <span class="project-number">Project 01</span>
-            <h3 class="project-title">AI Business Assistant</h3>
-            <p class="project-desc">
-              An AI-powered assistant concept designed to help small businesses
-              handle common customer questions.
-            </p>
-            <div class="project-tags">
-              <span class="tag">AI</span>
-              <span class="tag">JavaScript</span>
-              <span class="tag">Concept</span>
-            </div>
-            <div class="project-actions">
-              <a href="#" class="btn btn-small btn-primary" data-role="view-project">View Project</a>
-              <a href="#" class="btn btn-small btn-ghost" data-role="github-project">GitHub</a>
-            </div>
-          </article>
-
-          <article class="project-card">
-            <span class="project-status">Coming Soon</span>
-            <span class="project-number">Project 02</span>
-            <h3 class="project-title">AI Website Generator</h3>
-            <p class="project-desc">
-              A concept for generating simple business websites using
-              AI-assisted workflows.
-            </p>
-            <div class="project-tags">
-              <span class="tag">AI</span>
-              <span class="tag">Automation</span>
-              <span class="tag">Concept</span>
-            </div>
-            <div class="project-actions">
-              <a href="#" class="btn btn-small btn-primary" data-role="view-project">View Project</a>
-              <a href="#" class="btn btn-small btn-ghost" data-role="github-project">GitHub</a>
-            </div>
-          </article>
-
-          <article class="project-card">
-            <span class="project-status">Coming Soon</span>
-            <span class="project-number">Project 03</span>
-            <h3 class="project-title">Smart Product Catalog</h3>
-            <p class="project-desc">
-              A modern product catalog concept with AI-assisted product
-              descriptions and customer inquiry features.
-            </p>
-            <div class="project-tags">
-              <span class="tag">AI</span>
-              <span class="tag">UI/UX</span>
-              <span class="tag">Concept</span>
-            </div>
-            <div class="project-actions">
-              <a href="#" class="btn btn-small btn-primary" data-role="view-project">View Project</a>
-              <a href="#" class="btn btn-small btn-ghost" data-role="github-project">GitHub</a>
-            </div>
-          </article>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         5. SKILLS SECTION
-    ============================================ -->
-    <section class="section" id="skills">
-      <div class="section-inner">
-        <p class="eyebrow">// 04 — toolkit</p>
-        <h2 class="section-title">Skills &amp; Tools</h2>
-
-        <div class="skills-columns">
-          <div class="skills-col">
-            <h3 class="skills-col-title">Currently Learning</h3>
-            <ul class="skill-list">
-              <li><span>HTML</span><span class="skill-tag skill-building">Building</span></li>
-              <li><span>CSS</span><span class="skill-tag skill-building">Building</span></li>
-              <li><span>JavaScript</span><span class="skill-tag skill-learning">Learning</span></li>
-              <li><span>Python</span><span class="skill-tag skill-learning">Learning</span></li>
-              <li><span>AI Tools</span><span class="skill-tag skill-building">Building</span></li>
-              <li><span>APIs</span><span class="skill-tag skill-learning">Learning</span></li>
-              <li><span>Git / GitHub</span><span class="skill-tag skill-building">Building</span></li>
-            </ul>
-          </div>
-
-          <div class="skills-col">
-            <h3 class="skills-col-title">Future</h3>
-            <ul class="skill-list">
-              <li><span>React</span><span class="skill-tag skill-exploring">Exploring</span></li>
-              <li><span>Next.js</span><span class="skill-tag skill-exploring">Exploring</span></li>
-              <li><span>AI / ML</span><span class="skill-tag skill-exploring">Exploring</span></li>
-              <li><span>Automation</span><span class="skill-tag skill-exploring">Exploring</span></li>
-              <li><span>Cloud</span><span class="skill-tag skill-exploring">Exploring</span></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         6. LEARNING LOG
-    ============================================ -->
-    <section class="section" id="log">
-      <div class="section-inner">
-        <p class="eyebrow">// 05 — the log</p>
-        <h2 class="section-title">Learning Log</h2>
-        <p class="section-lead">
-          A running record of the journey. Add a new entry at the top each
-          time you finish something worth noting — see the README for how.
-        </p>
-
-        <ol class="log-list" id="logList">
-          <li class="log-entry">
-            <span class="log-day">Day 01</span>
-            <p>Started my 90-day AI developer journey.</p>
-          </li>
-          <li class="log-entry">
-            <span class="log-day">Day 07</span>
-            <p>Built my first responsive website.</p>
-          </li>
-          <li class="log-entry">
-            <span class="log-day">Day 30</span>
-            <p>Completed the foundation phase.</p>
-          </li>
-          <li class="log-entry">
-            <span class="log-day">Day 60</span>
-            <p>Built my first AI-powered project.</p>
-          </li>
-          <li class="log-entry">
-            <span class="log-day">Day 90</span>
-            <p>Published my portfolio and started approaching real clients.</p>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- ============================================
-         7. INSTAGRAM SECTION
-    ============================================ -->
-    <section class="section instagram-section" id="instagram">
-      <div class="section-inner instagram-inner">
-        <p class="eyebrow">// 06 — follow along</p>
-        <h2 class="section-title">Follow The Journey</h2>
-        <p class="instagram-text">
-          Building in public. Learning AI. Creating real projects.
-        </p>
-        <a href="https://instagram.com/TheAIcraftify" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-large">
-          Follow @TheAIcraftify
+        <a
+          class="btn primary"
+          href="https://theaicraftify.github.io/ai-idea-generator/"
+          target="_blank">
+          View Project
         </a>
+
+        <a
+          class="btn secondary"
+          href="https://github.com/TheAIcraftify/ai-idea-generator"
+          target="_blank">
+          GitHub
+        </a>
+
       </div>
-    </section>
 
-    <!-- ============================================
-         8. FUTURE GOAL SECTION
-    ============================================ -->
-    <section class="section" id="future">
-      <div class="section-inner">
-        <p class="eyebrow">// 07 — the direction</p>
-        <h2 class="section-title">Where I'm Going</h2>
-
-        <div class="journey-path">
-          <span class="journey-step">Learn</span>
-          <span class="journey-arrow">&rarr;</span>
-          <span class="journey-step">Build</span>
-          <span class="journey-arrow">&rarr;</span>
-          <span class="journey-step">Publish</span>
-          <span class="journey-arrow">&rarr;</span>
-          <span class="journey-step">Freelance</span>
-          <span class="journey-arrow">&rarr;</span>
-          <span class="journey-step">Work With Teams</span>
-          <span class="journey-arrow">&rarr;</span>
-          <span class="journey-step journey-step-final">Become an AI Developer</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================
-         9. CONTACT SECTION
-    ============================================ -->
-    <section class="section" id="contact">
-      <div class="section-inner">
-        <p class="eyebrow">// 08 — get in touch</p>
-        <h2 class="section-title">Let's Build Something</h2>
-        <p class="section-lead">
-          Open to feedback, collaboration, small freelance work and anyone
-          who wants to follow along.
-        </p>
-
-        <div class="contact-actions">
-          <a href="https://instagram.com/TheAIcraftify" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-contact">
-            Instagram
-          </a>
-          <a href="mailto:youremail@example.com" class="btn btn-ghost btn-contact">
-            Email
-          </a>
-          <a href="https://wa.me/10000000000" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-contact">
-            WhatsApp
-          </a>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ============================================
-       FOOTER
-  ============================================ -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <p class="footer-brand">TheAIcraftify</p>
-      <p class="footer-tagline">Learning. Building. Sharing.</p>
-      <p class="footer-copy">&copy; 2026 TheAIcraftify</p>
     </div>
-  </footer>
 
-  <script src="script.js"></script>
+
+    <!-- PROJECT 02 -->
+
+    <div class="project">
+
+      <div class="status">COMING SOON</div>
+
+      <div class="project-number">
+        PROJECT 02
+      </div>
+
+      <h3>AI Website Generator</h3>
+
+      <p>
+        A future project focused on generating simple business
+        websites using AI-assisted workflows and automation.
+      </p>
+
+      <div class="tags">
+        <span class="tag">AI</span>
+        <span class="tag">Automation</span>
+        <span class="tag">Web</span>
+      </div>
+
+    </div>
+
+
+    <!-- PROJECT 03 -->
+
+    <div class="project">
+
+      <div class="status">COMING SOON</div>
+
+      <div class="project-number">
+        PROJECT 03
+      </div>
+
+      <h3>AI Business Assistant</h3>
+
+      <p>
+        An AI-powered assistant concept designed to help small
+        businesses handle customer questions and everyday tasks.
+      </p>
+
+      <div class="tags">
+        <span class="tag">AI</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">Business</span>
+      </div>
+
+    </div>
+
+
+    <div class="about">
+
+      <h2>About The AI craftify</h2>
+
+      <p>
+        The AI craftify is a public learning and building journey.
+        The goal is simple: learn AI and web development by actually
+        creating useful projects and putting them online.
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+  The AI craftify — <span>Building in Public</span>
+</footer>
+
+
 </body>
 </html>
