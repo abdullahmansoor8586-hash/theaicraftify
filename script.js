@@ -1,189 +1,183 @@
-/* =====================================================================
-   THEAICRAFTIFY — SCRIPT
-   Plain JavaScript, no build tools, no libraries.
-   Everything here is grouped into small, labeled sections so you can
-   find and edit the part you need even if you're new to JS.
-   ===================================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  "use strict";
 
-document.addEventListener('DOMContentLoaded', () => {
+  /* =========================================================
+     THE AICRAFTIFY — PORTFOLIO CORE
+     + AI BUSINESS BLUEPRINT ENGINE
+  ========================================================= */
 
-  /* -------------------------------------------------------------------
-     1. MOBILE MENU
-     Opens/closes the nav links on small screens when the burger
-     icon is tapped, and closes automatically when a link is clicked.
-  ------------------------------------------------------------------- */
-  const navToggle = document.getElementById('navToggle');
-  const navLinks = document.getElementById('navLinks');
 
-  navToggle.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  });
+  /* =========================================================
+     1. MOBILE NAVIGATION
+  ========================================================= */
 
-  navLinks.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      navLinks.classList.remove('open');
-      navToggle.setAttribute('aria-expanded', 'false');
+  const navToggle = document.getElementById("navToggle");
+  const navLinks = document.getElementById("navLinks");
+
+  if (navToggle && navLinks) {
+    navToggle.addEventListener("click", () => {
+      const isOpen = navLinks.classList.toggle("is-open");
+      navToggle.setAttribute("aria-expanded", String(isOpen));
     });
-  });
+
+    navLinks.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("is-open");
+        navToggle.setAttribute("aria-expanded", "false");
+      });
+    });
+  }
 
 
-  /* -------------------------------------------------------------------
-     2. HERO TERMINAL TYPING EFFECT
-     Types out each message in TERMINAL_MESSAGES one character at a
-     time, pauses, deletes it, then moves to the next message.
-     Edit TERMINAL_MESSAGES below to change what it says.
-  ------------------------------------------------------------------- */
-  const TERMINAL_MESSAGES = [
-    'learning JavaScript...',
-    'building responsive layouts...',
-    'shipping real projects...',
-    'documenting the journey...'
-  ];
+  /* =========================================================
+     2. HERO TERMINAL TYPING
+  ========================================================= */
 
-  const terminalEl = document.getElementById('terminalText');
+  const terminalText = document.getElementById("terminalText");
 
-  if (terminalEl) {
+  if (terminalText) {
+    const messages = [
+      "learning JavaScript...",
+      "building responsive layouts...",
+      "shipping real projects...",
+      "building AI-powered tools...",
+      "turning ideas into business blueprints...",
+      "documenting the journey..."
+    ];
+
     let messageIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
+    let characterIndex = 0;
+    let deleting = false;
 
-    function typeLoop() {
-      const currentMessage = TERMINAL_MESSAGES[messageIndex];
+    const typingSpeed = 65;
+    const deletingSpeed = 35;
+    const pauseAfterTyping = 1700;
+    const pauseAfterDeleting = 500;
 
-      if (!isDeleting) {
-        charIndex++;
-        terminalEl.textContent = currentMessage.slice(0, charIndex);
+    function typeTerminalMessage() {
+      const currentMessage = messages[messageIndex];
 
-        if (charIndex === currentMessage.length) {
-          // Full word typed: pause, then start deleting
-          isDeleting = true;
-          setTimeout(typeLoop, 1400);
+      if (!deleting) {
+        characterIndex++;
+
+        terminalText.textContent =
+          currentMessage.substring(0, characterIndex);
+
+        if (characterIndex >= currentMessage.length) {
+          deleting = true;
+
+          setTimeout(
+            typeTerminalMessage,
+            pauseAfterTyping
+          );
+
           return;
         }
+
+        setTimeout(
+          typeTerminalMessage,
+          typingSpeed
+        );
+
       } else {
-        charIndex--;
-        terminalEl.textContent = currentMessage.slice(0, charIndex);
+        characterIndex--;
 
-        if (charIndex === 0) {
-          isDeleting = false;
-          messageIndex = (messageIndex + 1) % TERMINAL_MESSAGES.length;
+        terminalText.textContent =
+          currentMessage.substring(0, characterIndex);
+
+        if (characterIndex <= 0) {
+          deleting = false;
+
+          messageIndex =
+            (messageIndex + 1) % messages.length;
+
+          setTimeout(
+            typeTerminalMessage,
+            pauseAfterDeleting
+          );
+
+          return;
         }
-      }
 
-      const typingSpeed = isDeleting ? 30 : 55;
-      setTimeout(typeLoop, typingSpeed);
+        setTimeout(
+          typeTerminalMessage,
+          deletingSpeed
+        );
+      }
     }
 
-    typeLoop();
+    typeTerminalMessage();
   }
 
 
-  /* -------------------------------------------------------------------
-     3. 90-DAY ROADMAP: DAY COUNTER + TASK CHECKLIST
-     Saves progress in the browser's localStorage, so it stays even
-     after closing the tab. Nothing is sent anywhere — it's private
-     to your own browser on your own device.
-  ------------------------------------------------------------------- */
-  const STORAGE_KEY_DAY = 'theaicraftify_current_day';
-  const STORAGE_KEY_TASKS = 'theaicraftify_completed_tasks';
+  /* =========================================================
+     3. 90-DAY ROADMAP
+  ========================================================= */
+
   const TOTAL_DAYS = 90;
 
-  const dayCurrentEl = document.getElementById('dayCurrent');
-  const dayMinusBtn = document.getElementById('dayMinus');
-  const dayPlusBtn = document.getElementById('dayPlus');
-  const progressFillEl = document.getElementById('progressFill');
-  const taskCheckboxes = document.querySelectorAll('.task-list input[type="checkbox"]');
+  const dayCurrent =
+    document.getElementById("dayCurrent");
 
-  // Load saved day, defaulting to Day 1
-  let currentDay = parseInt(localStorage.getItem(STORAGE_KEY_DAY), 10);
-  if (isNaN(currentDay) || currentDay < 1) currentDay = 1;
-  if (currentDay > TOTAL_DAYS) currentDay = TOTAL_DAYS;
+  const dayMinus =
+    document.getElementById("dayMinus");
 
-  function renderDay() {
-    dayCurrentEl.textContent = currentDay;
-    const percent = (currentDay / TOTAL_DAYS) * 100;
-    progressFillEl.style.width = percent + '%';
-    localStorage.setItem(STORAGE_KEY_DAY, currentDay);
+  const dayPlus =
+    document.getElementById("dayPlus");
+
+  const progressFill =
+    document.getElementById("progressFill");
+
+  const DAY_STORAGE_KEY =
+    "theaicraftify_current_day";
+
+  const TASK_STORAGE_KEY =
+    "theaicraftify_completed_tasks";
+
+  let currentDay =
+    parseInt(
+      localStorage.getItem(DAY_STORAGE_KEY) || "1",
+      10
+    );
+
+  if (
+    Number.isNaN(currentDay) ||
+    currentDay < 1 ||
+    currentDay > TOTAL_DAYS
+  ) {
+    currentDay = 1;
   }
 
-  dayMinusBtn.addEventListener('click', () => {
-    if (currentDay > 1) {
-      currentDay--;
-      renderDay();
-    }
-  });
 
-  dayPlusBtn.addEventListener('click', () => {
-    if (currentDay < TOTAL_DAYS) {
-      currentDay++;
-      renderDay();
+  function updateDayUI() {
+    if (dayCurrent) {
+      dayCurrent.textContent = currentDay;
     }
-  });
 
-  renderDay();
+    if (progressFill) {
+      const percentage =
+        (currentDay / TOTAL_DAYS) * 100;
 
-  // Load saved checked tasks (stored as an array of task IDs, e.g. ["p1-1","p1-2"])
-  function getCompletedTasks() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY_TASKS);
-      return raw ? JSON.parse(raw) : [];
-    } catch (err) {
-      return [];
+      progressFill.style.width =
+        `${percentage}%`;
     }
+
+    localStorage.setItem(
+      DAY_STORAGE_KEY,
+      String(currentDay)
+    );
   }
 
-  function saveCompletedTasks(taskArray) {
-    localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(taskArray));
-  }
 
-  const completedTasks = getCompletedTasks();
-
-  // Apply saved state to checkboxes on page load
-  taskCheckboxes.forEach((checkbox) => {
-    const taskId = checkbox.dataset.task;
-    if (completedTasks.includes(taskId)) {
-      checkbox.checked = true;
-    }
-
-    // Save state whenever a checkbox changes
-    checkbox.addEventListener('change', () => {
-      const stored = getCompletedTasks();
-      const id = checkbox.dataset.task;
-
-      if (checkbox.checked && !stored.includes(id)) {
-        stored.push(id);
-      } else if (!checkbox.checked && stored.includes(id)) {
-        const idx = stored.indexOf(id);
-        stored.splice(idx, 1);
+  if (dayMinus) {
+    dayMinus.addEventListener("click", () => {
+      if (currentDay > 1) {
+        currentDay--;
+        updateDayUI();
       }
-
-      saveCompletedTasks(stored);
     });
-  });
-
-
-  /* -------------------------------------------------------------------
-     4. NAV LINK HIGHLIGHT ON SCROLL (nice-to-have, purely visual)
-     Adds a subtle "active" underline to whichever section is in view.
-     Safe to remove if you don't want this behavior.
-  ------------------------------------------------------------------- */
-  const sections = document.querySelectorAll('main section[id]');
-  const navAnchors = document.querySelectorAll('.nav-links a[href^="#"]');
-
-  if ('IntersectionObserver' in window && sections.length && navAnchors.length) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const id = entry.target.getAttribute('id');
-          navAnchors.forEach((a) => {
-            a.style.color = a.getAttribute('href') === `#${id}` ? 'var(--text)' : '';
-          });
-        }
-      });
-    }, { rootMargin: '-40% 0px -50% 0px' });
-
-    sections.forEach((section) => observer.observe(section));
   }
 
-});
+
+  if (dayPlus) {
+    dayPlus.addEventListener("click", ()
