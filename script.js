@@ -1,2161 +1,2186 @@
-document.addEventListener("DOMContentLoaded", () => {
-  "use strict";
+/* =========================================================
+   THEAICRAFTIFY
+   MAIN PORTFOLIO + AI BUSINESS BLUEPRINT ENGINE
+   ========================================================= */
 
-  /* =========================================================
-     THE AICRAFTIFY — PORTFOLIO CORE
-     + AI BUSINESS BLUEPRINT ENGINE
-  ========================================================= */
+"use strict";
 
+/* =========================================================
+   GLOBAL HELPERS
+========================================================= */
 
-  /* =========================================================
-     1. MOBILE NAVIGATION
-  ========================================================= */
+const $ = (selector, parent = document) =>
+  parent.querySelector(selector);
 
-  const navToggle = document.getElementById("navToggle");
-  const navLinks = document.getElementById("navLinks");
+const $$ = (selector, parent = document) =>
+  Array.from(parent.querySelectorAll(selector));
 
-  if (navToggle && navLinks) {
-    navToggle.addEventListener("click", () => {
-      const isOpen = navLinks.classList.toggle("is-open");
-      navToggle.setAttribute("aria-expanded", String(isOpen));
-    });
+const byId = (id) => document.getElementById(id);
 
-    navLinks.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        navLinks.classList.remove("is-open");
-        navToggle.setAttribute("aria-expanded", "false");
-      });
-    });
+const safeText = (value, fallback = "") => {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
   }
 
+  return String(value).trim();
+};
 
-  /* =========================================================
-     2. HERO TERMINAL TYPING
-  ========================================================= */
+const escapeHTML = (value) => {
+  return safeText(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
 
-  const terminalText = document.getElementById("terminalText");
+const wait = (ms) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-  if (terminalText) {
-    const messages = [
-      "learning JavaScript...",
-      "building responsive layouts...",
-      "shipping real projects...",
-      "building AI-powered tools...",
-      "turning ideas into business blueprints...",
-      "documenting the journey..."
-    ];
 
-    let messageIndex = 0;
-    let characterIndex = 0;
-    let deleting = false;
+/* =========================================================
+   DOM REFERENCES
+========================================================= */
 
-    const typingSpeed = 65;
-    const deletingSpeed = 35;
-    const pauseAfterTyping = 1700;
-    const pauseAfterDeleting = 500;
+const blueprintForm = byId("blueprintForm");
+const blueprintLoading = byId("blueprintLoading");
+const blueprintResults = byId("blueprintResults");
 
-    function typeTerminalMessage() {
-      const currentMessage = messages[messageIndex];
+const businessTypeInput = byId("businessType");
+const problemInput = byId("problem");
+const customersInput = byId("customers");
+const locationInput = byId("location");
+const budgetInput = byId("budget");
+const goalInput = byId("goal");
+const experienceInput = byId("experience");
+const businessIdeaInput = byId("businessIdea");
 
-      if (!deleting) {
-        characterIndex++;
+const menuToggle = byId("menuToggle");
+const mainNav = byId("mainNav");
 
-        terminalText.textContent =
-          currentMessage.substring(0, characterIndex);
 
-        if (characterIndex >= currentMessage.length) {
-          deleting = true;
+/* =========================================================
+   MOBILE NAVIGATION
+========================================================= */
 
-          setTimeout(
-            typeTerminalMessage,
-            pauseAfterTyping
-          );
+function closeMobileNav() {
+  if (!mainNav || !menuToggle) return;
 
-          return;
+  mainNav.classList.remove("is-open");
+  menuToggle.setAttribute("aria-expanded", "false");
+  menuToggle.setAttribute("aria-label", "Open navigation");
+}
+
+function toggleMobileNav() {
+  if (!mainNav || !menuToggle) return;
+
+  const open = mainNav.classList.toggle("is-open");
+
+  menuToggle.setAttribute(
+    "aria-expanded",
+    open ? "true" : "false"
+  );
+
+  menuToggle.setAttribute(
+    "aria-label",
+    open ? "Close navigation" : "Open navigation"
+  );
+}
+
+if (menuToggle) {
+  menuToggle.addEventListener("click", toggleMobileNav);
+}
+
+$$(".main-nav a").forEach((link) => {
+  link.addEventListener("click", closeMobileNav);
+});
+
+
+/* =========================================================
+   SMOOTH INTERNAL NAVIGATION
+========================================================= */
+
+$$('a[href^="#"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const targetId = link.getAttribute("href");
+
+    if (!targetId || targetId === "#") return;
+
+    const target = document.querySelector(targetId);
+
+    if (!target) return;
+
+    event.preventDefault();
+
+    target.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+    if (targetId === "#blueprint-engine") {
+      setTimeout(() => {
+        const firstInput = byId("businessIdea");
+
+        if (firstInput) {
+          firstInput.focus({ preventScroll: true });
         }
-
-        setTimeout(
-          typeTerminalMessage,
-          typingSpeed
-        );
-
-      } else {
-        characterIndex--;
-
-        terminalText.textContent =
-          currentMessage.substring(0, characterIndex);
-
-        if (characterIndex <= 0) {
-          deleting = false;
-
-          messageIndex =
-            (messageIndex + 1) % messages.length;
-
-          setTimeout(
-            typeTerminalMessage,
-            pauseAfterDeleting
-          );
-
-          return;
-        }
-
-        setTimeout(
-          typeTerminalMessage,
-          deletingSpeed
-        );
-      }
+      }, 700);
     }
-
-    typeTerminalMessage();
-  }
-
-
-  /* =========================================================
-     3. 90-DAY ROADMAP
-  ========================================================= */
-
-  const TOTAL_DAYS = 90;
-
-  const dayCurrent =
-    document.getElementById("dayCurrent");
-
-  const dayMinus =
-    document.getElementById("dayMinus");
-
-  const dayPlus =
-    document.getElementById("dayPlus");
-
-  const progressFill =
-    document.getElementById("progressFill");
-
-  const DAY_STORAGE_KEY =
-    "theaicraftify_current_day";
-
-  const TASK_STORAGE_KEY =
-    "theaicraftify_completed_tasks";
-
-  let currentDay =
-    parseInt(
-      localStorage.getItem(DAY_STORAGE_KEY) || "1",
-      10
-    );
-
-  if (
-    Number.isNaN(currentDay) ||
-    currentDay < 1 ||
-    currentDay > TOTAL_DAYS
-  ) {
-    currentDay = 1;
-  }
+  });
+});
 
 
-  function updateDayUI() {
-    if (dayCurrent) {
-      dayCurrent.textContent = currentDay;
-    }
+/* =========================================================
+   HERO / YEAR
+========================================================= */
 
-    if (progressFill) {
-      const percentage =
-        (currentDay / TOTAL_DAYS) * 100;
+const currentYear = byId("currentYear");
 
-      progressFill.style.width =
-        `${percentage}%`;
-    }
-
-    localStorage.setItem(
-      DAY_STORAGE_KEY,
-      String(currentDay)
-    );
-  }
+if (currentYear) {
+  currentYear.textContent = new Date().getFullYear();
+}
 
 
-  if (dayMinus) {
-    dayMinus.addEventListener("click", () => {
-      if (currentDay > 1) {
-        currentDay--;
-        updateDayUI();
-      }
-    });
-  }
+/* =========================================================
+   PORTFOLIO ROADMAP PROGRESS
+========================================================= */
 
+const progressBar = byId("progressBar");
+const progressPercent = byId("progressPercent");
 
-  if (dayPlus) {
-    dayPlus.addEventListener("click", () => {
-      if (currentDay < TOTAL_DAYS) {
-        currentDay++;
-        updateDayUI();
-      }
-    });
-  }
+const ROADMAP_STORAGE_KEY =
+  "theaicraftify_90_day_progress";
 
-
-  updateDayUI();
-
-
-  /* =========================================================
-     4. ROADMAP CHECKBOX PERSISTENCE
-  ========================================================= */
-
-  let completedTasks = [];
+function loadRoadmapProgress() {
+  let progress = 0;
 
   try {
-    completedTasks =
-      JSON.parse(
-        localStorage.getItem(TASK_STORAGE_KEY) || "[]"
-      );
+    const saved = localStorage.getItem(
+      ROADMAP_STORAGE_KEY
+    );
 
-    if (!Array.isArray(completedTasks)) {
-      completedTasks = [];
+    if (saved !== null) {
+      progress = Number(saved);
     }
-
   } catch (error) {
-    completedTasks = [];
+    progress = 0;
   }
 
+  if (!Number.isFinite(progress)) {
+    progress = 0;
+  }
 
-  const taskCheckboxes =
-    document.querySelectorAll(
-      'input[type="checkbox"][data-task]'
+  progress = Math.max(0, Math.min(100, progress));
+
+  if (progressBar) {
+    progressBar.style.width = `${progress}%`;
+  }
+
+  if (progressPercent) {
+    progressPercent.textContent = `${progress}%`;
+  }
+}
+
+loadRoadmapProgress();
+
+
+/* =========================================================
+   BUSINESS PROFILES
+========================================================= */
+
+const BUSINESS_PROFILES = {
+
+  restaurant: {
+    label: "Restaurant / Food",
+
+    customer:
+      "local customers, office workers, families and nearby repeat buyers",
+
+    earlyAdopters:
+      "customers already buying similar food nearby and people actively looking for convenient meal options",
+
+    buyer:
+      "the person who directly pays for the meal or order",
+
+    value:
+      "Make food ordering easier, more convenient and more valuable while maintaining consistent quality.",
+
+    features: [
+      "Clear menu and pricing",
+      "Simple ordering process",
+      "WhatsApp / phone ordering",
+      "Delivery or pickup workflow",
+      "Customer feedback collection",
+      "Repeat-customer offers"
+    ],
+
+    mvp:
+      "Start with a small focused menu, simple digital presence, WhatsApp ordering and a reliable delivery/pickup process.",
+
+    tech:
+      "Responsive website, WhatsApp Business, Google Business Profile, simple order form and spreadsheet/database for tracking.",
+
+    revenue:
+      "Direct sales from food orders",
+
+    alternatives: [
+      "Meal subscriptions",
+      "Corporate lunch packages",
+      "Party / catering orders",
+      "Premium add-ons"
+    ],
+
+    marketing:
+      "Use local content, Google Business Profile, Instagram, WhatsApp and referral offers to create awareness.",
+
+    acquisition:
+      "Start with a small geographic area and personally acquire the first customers through local outreach, referrals and introductory offers.",
+
+    risks: [
+      "Food quality inconsistency",
+      "Delivery delays",
+      "Low repeat purchase rate",
+      "High ingredient or operating costs"
+    ]
+  },
+
+
+  clothing: {
+    label: "Clothing / Fashion",
+
+    customer:
+      "young fashion-conscious customers looking for a specific style at an affordable price",
+
+    earlyAdopters:
+      "people already following fashion creators, streetwear pages or niche clothing communities",
+
+    buyer:
+      "the end customer purchasing clothing for personal use",
+
+    value:
+      "Give customers a clear style identity through focused products instead of an unfocused clothing catalog.",
+
+    features: [
+      "Focused product collection",
+      "Strong product photography",
+      "Size guide",
+      "Simple checkout/order flow",
+      "Social media storefront",
+      "Customer reviews"
+    ],
+
+    mvp:
+      "Launch a small collection with a limited number of products and test demand before expanding inventory.",
+
+    tech:
+      "Mobile-first storefront, payment/order system, social media and simple inventory tracking.",
+
+    revenue:
+      "Product sales",
+
+    alternatives: [
+      "Limited edition drops",
+      "Bundles",
+      "Custom products",
+      "Wholesale"
+    ],
+
+    marketing:
+      "Build visual content around the brand identity, product drops, customer photos and creator collaborations.",
+
+    acquisition:
+      "Use Instagram, short-form video, micro-creators, referrals and limited launch drops.",
+
+    risks: [
+      "Unsold inventory",
+      "Weak differentiation",
+      "Returns and sizing problems",
+      "High customer acquisition cost"
+    ]
+  },
+
+
+  school: {
+    label: "School / Education",
+
+    customer:
+      "students, parents, teachers or learners looking for measurable educational improvement",
+
+    earlyAdopters:
+      "students and parents already actively searching for better learning outcomes",
+
+    buyer:
+      "usually the parent, student or institution paying for the service",
+
+    value:
+      "Make learning more structured, accessible and measurable.",
+
+    features: [
+      "Focused curriculum",
+      "Learning resources",
+      "Practice tests",
+      "Progress tracking",
+      "Teacher or mentor support",
+      "Parent/student communication"
+    ],
+
+    mvp:
+      "Start with one subject or one specific learner problem instead of trying to build a complete education platform.",
+
+    tech:
+      "Responsive website, learning content system, forms, video tools and simple progress tracking.",
+
+    revenue:
+      "Course fees or subscription",
+
+    alternatives: [
+      "One-to-one tutoring",
+      "Group classes",
+      "Exam preparation packages",
+      "Institution partnerships"
+    ],
+
+    marketing:
+      "Publish useful educational content and use results, testimonials and referrals to build trust.",
+
+    acquisition:
+      "Free trial sessions, local outreach, parent communities, referrals and educational content.",
+
+    risks: [
+      "Low student engagement",
+      "Weak outcomes",
+      "High dependence on individual teachers",
+      "Difficulty proving value"
+    ]
+  },
+
+
+  salon: {
+    label: "Salon / Beauty",
+
+    customer:
+      "local customers who regularly need beauty, grooming or personal-care services",
+
+    earlyAdopters:
+      "nearby customers actively searching for salon or beauty services",
+
+    buyer:
+      "the customer booking and paying for the service",
+
+    value:
+      "Make booking easier while delivering consistent service and a better customer experience.",
+
+    features: [
+      "Service menu",
+      "Price list",
+      "Appointment booking",
+      "WhatsApp communication",
+      "Customer reminders",
+      "Repeat-visit offers"
+    ],
+
+    mvp:
+      "Create a clear service menu, booking flow and local presence before building complex software.",
+
+    tech:
+      "Website, WhatsApp Business, booking form, Google Business Profile and customer tracking.",
+
+    revenue:
+      "Service bookings",
+
+    alternatives: [
+      "Memberships",
+      "Packages",
+      "Retail products",
+      "Premium services"
+    ],
+
+    marketing:
+      "Use before/after content, local SEO, customer reviews, referrals and limited-time packages.",
+
+    acquisition:
+      "Google Business Profile, Instagram, referrals and local partnerships.",
+
+    risks: [
+      "Inconsistent service quality",
+      "Appointment cancellations",
+      "Staff dependency",
+      "Weak repeat rate"
+    ]
+  },
+
+
+  agency: {
+    label: "Agency",
+
+    customer:
+      "small and medium businesses that need a specific service but do not want a full-time specialist",
+
+    earlyAdopters:
+      "business owners already spending money on the problem you solve",
+
+    buyer:
+      "the founder, owner or marketing/business decision-maker",
+
+    value:
+      "Solve a clearly defined business problem without requiring the client to build an internal team.",
+
+    features: [
+      "Focused service package",
+      "Clear deliverables",
+      "Client onboarding",
+      "Reporting",
+      "Communication workflow",
+      "Case studies"
+    ],
+
+    mvp:
+      "Sell one focused service to a small number of clients before expanding into a full-service agency.",
+
+    tech:
+      "Landing page, CRM/spreadsheet, communication tools, analytics and automation tools.",
+
+    revenue:
+      "Monthly retainers or project fees",
+
+    alternatives: [
+      "One-time projects",
+      "Consulting",
+      "Performance-based fees",
+      "Productized services"
+    ],
+
+    marketing:
+      "Publish proof-based content, case studies and educational material around one specific client problem.",
+
+    acquisition:
+      "Direct outreach, referrals, LinkedIn, local networking and targeted content.",
+
+    risks: [
+      "Too many services",
+      "Client dependency",
+      "Scope creep",
+      "Unpredictable acquisition"
+    ]
+  },
+
+
+  shop: {
+    label: "Shop / Retail",
+
+    customer:
+      "local consumers looking for convenient access to useful products",
+
+    earlyAdopters:
+      "existing local shoppers with a recurring need for the product category",
+
+    buyer:
+      "the end customer",
+
+    value:
+      "Provide the right products conveniently with reliable pricing, availability and service.",
+
+    features: [
+      "Focused catalog",
+      "Clear pricing",
+      "Simple ordering",
+      "Inventory tracking",
+      "Customer support",
+      "Repeat purchase offers"
+    ],
+
+    mvp:
+      "Start with a focused product selection and validate demand before expanding inventory.",
+
+    tech:
+      "Simple storefront, payment/order system, inventory tracker and messaging channel.",
+
+    revenue:
+      "Product margins",
+
+    alternatives: [
+      "Subscriptions",
+      "Bundles",
+      "Wholesale",
+      "Private-label products"
+    ],
+
+    marketing:
+      "Local discovery, social media, referrals, offers and useful product content.",
+
+    acquisition:
+      "Google Business Profile, local SEO, referrals, WhatsApp and social media.",
+
+    risks: [
+      "Inventory risk",
+      "Low margins",
+      "Price competition",
+      "Slow-moving products"
+    ]
+  },
+
+
+  realEstate: {
+    label: "Real Estate",
+
+    customer:
+      "buyers, renters, investors or property owners depending on the selected niche",
+
+    earlyAdopters:
+      "people already searching for properties or property-related services",
+
+    buyer:
+      "the person or business paying for the property transaction or service",
+
+    value:
+      "Reduce the friction of discovering, evaluating and transacting around property.",
+
+    features: [
+      "Property listings",
+      "Search/filtering",
+      "Lead capture",
+      "Property details",
+      "Appointment scheduling",
+      "Lead follow-up"
+    ],
+
+    mvp:
+      "Start with a focused local property niche and a reliable lead-generation process rather than a massive marketplace.",
+
+    tech:
+      "Responsive website, lead forms, CRM/spreadsheet, maps and communication tools.",
+
+    revenue:
+      "Commission, service fee or lead-generation fee",
+
+    alternatives: [
+      "Property management",
+      "Premium listings",
+      "Consulting",
+      "Developer partnerships"
+    ],
+
+    marketing:
+      "Local property content, search visibility, social media and useful market information.",
+
+    acquisition:
+      "Local SEO, referrals, property content, direct outreach and partnerships.",
+
+    risks: [
+      "Low-quality leads",
+      "Long sales cycles",
+      "Regulatory requirements",
+      "Trust issues"
+    ]
+  },
+
+
+  manufacturing: {
+    label: "Manufacturing",
+
+    customer:
+      "businesses or distributors that need reliable products at an acceptable cost and quality level",
+
+    earlyAdopters:
+      "buyers with a recurring supply requirement and an urgent or underserved sourcing problem",
+
+    buyer:
+      "procurement manager, business owner, distributor or operations decision-maker",
+
+    value:
+      "Deliver consistent quality, predictable supply and competitive economics.",
+
+    features: [
+      "Product specification",
+      "Sample process",
+      "Quality control",
+      "Production workflow",
+      "Order tracking",
+      "Customer support"
+    ],
+
+    mvp:
+      "Validate one product line and a small number of customers before investing heavily in capacity.",
+
+    tech:
+      "Website, CRM, inventory/production tracking and communication tools.",
+
+    revenue:
+      "Wholesale product sales",
+
+    alternatives: [
+      "Contract manufacturing",
+      "Private label",
+      "Bulk orders",
+      "Long-term supply contracts"
+    ],
+
+    marketing:
+      "B2B outreach, product documentation, samples, industry networking and case studies.",
+
+    acquisition:
+      "Direct sales, distributor partnerships, trade networks and targeted B2B outreach.",
+
+    risks: [
+      "High upfront investment",
+      "Quality problems",
+      "Supply chain disruption",
+      "Working-capital pressure"
+    ]
+  },
+
+
+  exporter: {
+    label: "Export / Trading",
+
+    customer:
+      "international buyers, distributors, retailers or businesses looking for reliable suppliers",
+
+    earlyAdopters:
+      "buyers already sourcing your product category and looking for alternative suppliers",
+
+    buyer:
+      "importer, distributor, wholesaler or procurement decision-maker",
+
+    value:
+      "Make cross-border sourcing simpler through reliable product quality, communication and fulfillment.",
+
+    features: [
+      "Product catalog",
+      "Buyer inquiry system",
+      "Product specifications",
+      "Quotation workflow",
+      "Documentation",
+      "Order tracking"
+    ],
+
+    mvp:
+      "Focus on one product category and a small number of target markets before expanding.",
+
+    tech:
+      "B2B website, inquiry forms, CRM, document workflow and communication tools.",
+
+    revenue:
+      "Wholesale/export margins",
+
+    alternatives: [
+      "Sourcing services",
+      "Private label",
+      "Distribution",
+      "Commission-based trading"
+    ],
+
+    marketing:
+      "B2B content, search visibility, product catalogs, trade networks and direct outreach.",
+
+    acquisition:
+      "Targeted buyer lists, direct outreach, trade platforms and industry partnerships.",
+
+    risks: [
+      "Payment risk",
+      "Logistics issues",
+      "Regulatory requirements",
+      "Currency fluctuations"
+    ]
+  },
+
+
+  service: {
+    label: "Service Business",
+
+    customer:
+      "people or businesses with a recurring or urgent problem that can be solved through a service",
+
+    earlyAdopters:
+      "customers already paying for alternatives or actively searching for a solution",
+
+    buyer:
+      "the person responsible for paying for the service",
+
+    value:
+      "Deliver a clear outcome without making the customer manage the complexity themselves.",
+
+    features: [
+      "Clear service package",
+      "Booking or inquiry process",
+      "Transparent pricing",
+      "Customer communication",
+      "Delivery workflow",
+      "Feedback system"
+    ],
+
+    mvp:
+      "Start manually with one focused service and document the workflow before automating it.",
+
+    tech:
+      "Simple website, forms, communication tools, calendar and customer tracking.",
+
+    revenue:
+      "Service fees",
+
+    alternatives: [
+      "Packages",
+      "Subscriptions",
+      "Retainers",
+      "Premium add-ons"
+    ],
+
+    marketing:
+      "Educational content, local discovery, referrals and proof of results.",
+
+    acquisition:
+      "Direct outreach, referrals, local SEO and social media.",
+
+    risks: [
+      "Time-for-money limitation",
+      "Inconsistent delivery",
+      "Customer acquisition difficulty",
+      "Operational overload"
+    ]
+  },
+
+
+  general: {
+    label: "General Business",
+
+    customer:
+      "a clearly defined customer group experiencing the problem you described",
+
+    earlyAdopters:
+      "people already aware of the problem and actively looking for alternatives",
+
+    buyer:
+      "the person who receives enough value from the solution to pay for it",
+
+    value:
+      "Solve one meaningful customer problem with a simple, focused and measurable solution.",
+
+    features: [
+      "Simple onboarding",
+      "Core solution",
+      "Customer feedback",
+      "Basic analytics",
+      "Communication channel",
+      "Repeat-use mechanism"
+    ],
+
+    mvp:
+      "Start with the smallest version that can test whether customers actually want the solution.",
+
+    tech:
+      "A simple responsive website, forms, analytics, communication tools and only the automation required for the MVP.",
+
+    revenue:
+      "Charge for the core outcome or product value.",
+
+    alternatives: [
+      "Subscription",
+      "One-time purchase",
+      "Service fee",
+      "Premium version"
+    ],
+
+    marketing:
+      "Focus on useful content, customer proof and a clear explanation of the problem you solve.",
+
+    acquisition:
+      "Start with direct outreach, communities, referrals and one focused acquisition channel.",
+
+    risks: [
+      "Building before validating",
+      "Unclear target customer",
+      "Weak differentiation",
+      "Trying to do too much at once"
+    ]
+  }
+
+};
+
+
+/* =========================================================
+   BUSINESS TYPE DETECTION
+========================================================= */
+
+function detectBusinessType(text) {
+
+  const value = safeText(text).toLowerCase();
+
+  const keywords = {
+
+    restaurant: [
+      "restaurant",
+      "food",
+      "meal",
+      "cafe",
+      "café",
+      "bakery",
+      "cloud kitchen",
+      "kitchen",
+      "delivery food",
+      "tiffin"
+    ],
+
+    clothing: [
+      "clothing",
+      "fashion",
+      "shirt",
+      "tshirt",
+      "t-shirt",
+      "jeans",
+      "streetwear",
+      "apparel",
+      "garment",
+      "dress"
+    ],
+
+    school: [
+      "school",
+      "student",
+      "education",
+      "course",
+      "tuition",
+      "coaching",
+      "learning",
+      "exam",
+      "academy"
+    ],
+
+    salon: [
+      "salon",
+      "beauty",
+      "spa",
+      "barber",
+      "hair",
+      "grooming",
+      "makeup"
+    ],
+
+    agency: [
+      "agency",
+      "marketing agency",
+      "digital marketing",
+      "advertising",
+      "creative agency",
+      "development agency"
+    ],
+
+    shop: [
+      "shop",
+      "store",
+      "retail",
+      "grocery",
+      "products",
+      "retailer"
+    ],
+
+    realEstate: [
+      "real estate",
+      "property",
+      "properties",
+      "realty",
+      "rent",
+      "rental",
+      "apartment",
+      "flat"
+    ],
+
+    manufacturing: [
+      "manufacturing",
+      "factory",
+      "manufacture",
+      "production",
+      "industrial",
+      "wholesale production"
+    ],
+
+    exporter: [
+      "export",
+      "import",
+      "trading",
+      "international buyer",
+      "international buyers",
+      "supplier",
+      "sourcing"
+    ],
+
+    service: [
+      "service",
+      "services",
+      "consulting",
+      "repair",
+      "cleaning",
+      "maintenance",
+      "freelance"
+    ]
+  };
+
+  for (const [type, words] of Object.entries(keywords)) {
+
+    if (words.some((word) => value.includes(word))) {
+      return type;
+    }
+
+  }
+
+  return "general";
+}
+
+
+/* =========================================================
+   FORM DATA
+========================================================= */
+
+function collectBlueprintData() {
+
+  const businessIdea =
+    safeText(
+      businessIdeaInput ? businessIdeaInput.value : ""
     );
 
-
-  taskCheckboxes.forEach((checkbox) => {
-
-    const taskId =
-      checkbox.dataset.task;
-
-    checkbox.checked =
-      completedTasks.includes(taskId);
-
-
-    checkbox.addEventListener("change", () => {
-
-      if (checkbox.checked) {
-
-        if (!completedTasks.includes(taskId)) {
-          completedTasks.push(taskId);
-        }
-
-      } else {
-
-        completedTasks =
-          completedTasks.filter(
-            (id) => id !== taskId
-          );
-      }
-
-      localStorage.setItem(
-        TASK_STORAGE_KEY,
-        JSON.stringify(completedTasks)
-      );
-    });
-  });
-
-
-  /* =========================================================
-     5. ACTIVE NAVIGATION ON SCROLL
-  ========================================================= */
-
-  const sections =
-    document.querySelectorAll(
-      "main section[id]"
+  const selectedType =
+    safeText(
+      businessTypeInput ? businessTypeInput.value : "general",
+      "general"
     );
 
-  const navAnchors =
-    document.querySelectorAll(
-      '.nav-links a[href^="#"]'
+  const combinedText = [
+    businessIdea,
+    safeText(problemInput ? problemInput.value : ""),
+    safeText(customersInput ? customersInput.value : "")
+  ].join(" ");
+
+  let type = selectedType;
+
+  if (!type || type === "general") {
+    type = detectBusinessType(combinedText);
+  }
+
+  return {
+    businessType: type,
+
+    businessIdea,
+
+    problem:
+      safeText(
+        problemInput ? problemInput.value : ""
+      ),
+
+    customers:
+      safeText(
+        customersInput ? customersInput.value : ""
+      ),
+
+    location:
+      safeText(
+        locationInput ? locationInput.value : "",
+        "Your local market"
+      ),
+
+    budget:
+      safeText(
+        budgetInput ? budgetInput.value : "low",
+        "low"
+      ),
+
+    goal:
+      safeText(
+        goalInput ? goalInput.value : "validate",
+        "validate"
+      ),
+
+    experience:
+      safeText(
+        experienceInput ? experienceInput.value : "beginner",
+        "beginner"
+      )
+  };
+}
+
+
+/* =========================================================
+   ADAPTIVE CUSTOMER
+========================================================= */
+
+function buildCustomer(data, profile) {
+
+  if (data.customers) {
+    return data.customers;
+  }
+
+  return profile.customer;
+}
+
+
+/* =========================================================
+   PROBLEM GENERATION
+========================================================= */
+
+function buildProblem(data, profile) {
+
+  if (data.problem) {
+    return data.problem;
+  }
+
+  if (data.businessIdea) {
+
+    return (
+      `The opportunity is to turn the problem described in the idea ` +
+      `into a focused solution for ${profile.customer}.`
+    );
+  }
+
+  return (
+    `The business needs to identify one specific, painful and ` +
+    `frequent customer problem before investing heavily in the solution.`
+  );
+}
+
+
+/* =========================================================
+   SOLUTION GENERATION
+========================================================= */
+
+function buildSolution(data, profile) {
+
+  if (data.businessIdea) {
+
+    return (
+      `Build a focused ${profile.label.toLowerCase()} solution around ` +
+      `the idea you described, starting with a small MVP for ` +
+      `${buildCustomer(data, profile)} in ${data.location}.`
+    );
+  }
+
+  return (
+    `Build a focused ${profile.label.toLowerCase()} offering that solves ` +
+    `one measurable problem for ${buildCustomer(data, profile)}.`
+  );
+}
+
+
+/* =========================================================
+   VALUE PROPOSITION
+========================================================= */
+
+function buildValue(data, profile) {
+
+  let value = profile.value;
+
+  if (data.goal === "customers") {
+    value +=
+      " The immediate priority should be proving that customers will actually pay.";
+  }
+
+  if (data.goal === "revenue") {
+    value +=
+      " The business model should be designed around repeatable revenue.";
+  }
+
+  if (data.goal === "scale") {
+    value +=
+      " The offer should be standardized enough to become repeatable.";
+  }
+
+  return value;
+}
+
+
+/* =========================================================
+   BUDGET STRATEGY
+========================================================= */
+
+function buildBudget(data) {
+
+  if (data.budget === "low") {
+
+    return (
+      "Bootstrap approach: validate demand manually first. " +
+      "Use free or low-cost tools, avoid unnecessary inventory, " +
+      "and spend only after evidence of customer demand."
     );
 
+  }
+
+  if (data.budget === "medium") {
+
+    return (
+      "Balanced approach: invest in a professional MVP, basic " +
+      "branding, customer acquisition experiments and operational systems."
+    );
+
+  }
+
+  return (
+    "Higher-budget approach: build a stronger initial operation, " +
+    "but still validate the customer problem before committing " +
+    "large amounts of capital."
+  );
+}
+
+
+/* =========================================================
+   EXPERIENCE STRATEGY
+========================================================= */
+
+function buildExperience(data) {
+
+  if (data.experience === "beginner") {
+
+    return (
+      "Beginner strategy: keep the first version simple, " +
+      "learn while building and avoid unnecessary technology."
+    );
+
+  }
+
+  if (data.experience === "some") {
+
+    return (
+      "Intermediate strategy: use existing skills to move faster " +
+      "while validating the business before adding complexity."
+    );
+
+  }
+
+  return (
+    "Experienced strategy: focus on speed of validation, " +
+    "distribution, unit economics and repeatable execution."
+  );
+}
+
+
+/* =========================================================
+   EFFORT
+========================================================= */
+
+function buildEffort(data) {
 
   if (
-    "IntersectionObserver" in window &&
-    sections.length
+    data.businessType === "manufacturing" ||
+    data.businessType === "exporter"
   ) {
 
-    const sectionObserver =
-      new IntersectionObserver(
-        (entries) => {
-
-          entries.forEach((entry) => {
-
-            if (!entry.isIntersecting) {
-              return;
-            }
-
-            const id =
-              entry.target.getAttribute("id");
-
-            navAnchors.forEach((link) => {
-
-              const matches =
-                link.getAttribute("href") === `#${id}`;
-
-              link.classList.toggle(
-                "active",
-                matches
-              );
-            });
-
-          });
-
-        },
-        {
-          rootMargin: "-35% 0px -55% 0px"
-        }
-      );
-
-
-    sections.forEach((section) => {
-      sectionObserver.observe(section);
-    });
+    return (
+      "High operational effort. Product quality, suppliers, " +
+      "logistics and customer relationships will require significant attention."
+    );
   }
 
+  if (data.businessType === "restaurant") {
 
-  /* =========================================================
-     6. BLUEPRINT ENGINE — HELPERS
-  ========================================================= */
-
-  const blueprintForm =
-    document.getElementById("blueprintForm");
-
-  const blueprintLoading =
-    document.getElementById("blueprintLoading");
-
-  const blueprintResults =
-    document.getElementById("blueprintResults");
-
-  const businessTypeInput =
-    document.getElementById("businessType");
-
-  const problemInput =
-    document.getElementById("problem");
-
-  const customersInput =
-    document.getElementById("customers");
-
-  const locationInput =
-    document.getElementById("location");
-
-  const budgetInput =
-    document.getElementById("budget");
-
-  const goalInput =
-    document.getElementById("goal");
-
-  const experienceInput =
-    document.getElementById("experience");
-
-  const regenerateBtn =
-    document.getElementById("regenerateBtn");
-
-  const newIdeaBtn =
-    document.getElementById("newIdeaBtn");
-
-
-  function clean(value, fallback = "") {
-    if (
-      value === undefined ||
-      value === null
-    ) {
-      return fallback;
-    }
-
-    return String(value).trim();
+    return (
+      "Medium-to-high effort. Operations, quality, customer service " +
+      "and repeat orders matter every day."
+    );
   }
 
+  if (
+    data.businessType === "agency" ||
+    data.businessType === "service"
+  ) {
 
-  function normalize(value) {
-    return clean(value)
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+    return (
+      "Medium effort initially, but customer acquisition and service delivery " +
+      "can become the main workload as demand increases."
+    );
   }
 
+  return (
+    "Medium effort. Start small, validate quickly and increase complexity " +
+    "only when customer demand justifies it."
+  );
+}
 
-  function setText(id, value) {
-    const element =
-      document.getElementById(id);
+
+/* =========================================================
+   PRICING
+========================================================= */
+
+function buildPricing(data, profile) {
+
+  const location =
+    data.location || "your market";
+
+  if (data.businessType === "restaurant") {
+
+    return (
+      `Price around the local competitive range in ${location}. ` +
+      `Use entry-level items to acquire customers and higher-margin ` +
+      `bundles or add-ons to improve order economics.`
+    );
+  }
+
+  if (data.businessType === "clothing") {
+
+    return (
+      "Start with a price that protects your gross margin while remaining " +
+      "credible against comparable products. Test bundles and limited drops."
+    );
+  }
+
+  if (
+    data.businessType === "agency" ||
+    data.businessType === "service"
+  ) {
+
+    return (
+      "Use package-based pricing rather than selling hours. " +
+      "Create a clear entry package, a core package and an optional premium tier."
+    );
+  }
+
+  if (data.businessType === "school") {
+
+    return (
+      "Test a simple monthly, course-based or cohort-based price. " +
+      "Price should reflect measurable learning value and local purchasing power."
+    );
+  }
+
+  return (
+    "Start with a simple price that customers can understand. " +
+    "Test willingness to pay with real customers before optimizing pricing."
+  );
+}
+
+
+/* =========================================================
+   MARKETING
+========================================================= */
+
+function buildMarketing(data, profile) {
+
+  let result = profile.marketing;
+
+  if (data.location) {
+    result +=
+      ` Start locally in ${data.location} before trying to reach a broad market.`;
+  }
+
+  if (data.goal === "validate") {
+    result +=
+      " At the validation stage, conversations and direct feedback are more important than large advertising spend.";
+  }
+
+  return result;
+}
+
+
+/* =========================================================
+   ACQUISITION
+========================================================= */
+
+function buildAcquisition(data, profile) {
+
+  let result = profile.acquisition;
+
+  if (data.experience === "beginner") {
+
+    result +=
+      " Keep the first acquisition process manual so you learn what actually convinces customers.";
+
+  }
+
+  if (data.budget === "low") {
+
+    result +=
+      " Prioritize organic and direct channels before paid advertising.";
+
+  }
+
+  return result;
+}
+
+
+/* =========================================================
+   ROADMAP
+========================================================= */
+
+function buildRoadmap(data, profile) {
+
+  const type = profile.label.toLowerCase();
+
+  const roadmap30 =
+    `Define the exact customer and problem. Interview or speak with ` +
+    `${buildCustomer(data, profile)}. Study existing alternatives, ` +
+    `choose one focused offer and test whether people are willing to pay. ` +
+    `For this ${type} business, keep the first experiment small.`;
+
+  const roadmap60 =
+    `Build the smallest workable version of the offer. Create the MVP, ` +
+    `set up basic operations, pricing and customer communication. ` +
+    `Aim to serve a small number of real customers and document what happens.`;
+
+  const roadmap90 =
+    `Launch publicly in a focused market. Acquire the first repeat customers, ` +
+    `measure conversion and repeat usage, collect feedback and remove ` +
+    `features or processes that do not create value.`;
+
+  const roadmap6 =
+    `Move from experimentation to a repeatable operating system. ` +
+    `Improve the offer, customer experience and acquisition process. ` +
+    `Track revenue, costs, repeat purchases and customer acquisition.`;
+
+  const roadmap12 =
+    `Strengthen unit economics and retention. Standardize operations, ` +
+    `automate repetitive work where useful, develop stronger marketing ` +
+    `channels and build a reliable customer pipeline.`;
+
+  const roadmapLong =
+    `Scale only the parts of the business that have already been validated. ` +
+    `Expand products, markets, locations or team capacity based on evidence. ` +
+    `The long-term objective is a repeatable business rather than simply a bigger MVP.`;
+
+  return {
+    roadmap30,
+    roadmap60,
+    roadmap90,
+    roadmap6,
+    roadmap12,
+    roadmapLong
+  };
+}
+
+
+/* =========================================================
+   GROWTH STRATEGY
+========================================================= */
+
+function buildGrowth(data, profile) {
+
+  const customer =
+    buildCustomer(data, profile);
+
+  return (
+    `Growth should happen in stages. First dominate a small customer segment ` +
+    `such as ${customer}. Then build a repeatable acquisition channel, improve ` +
+    `retention and economics, and only then expand into additional products, ` +
+    `markets or locations. Avoid scaling operational complexity before demand ` +
+    `is proven.`
+  );
+}
+
+
+/* =========================================================
+   FIRST ACTIONS
+========================================================= */
+
+function buildFirstActions(data, profile) {
+
+  return [
+    `Write a one-sentence description of the customer problem.`,
+    `Talk to at least 5–10 potential customers.`,
+    `Study 3–5 existing alternatives and record their pricing.`,
+    `Create the smallest version of the offer.`,
+    `Try to get the first real customer before adding unnecessary features.`,
+    `Track feedback, costs, conversion and repeat demand.`
+  ];
+}
+
+
+/* =========================================================
+   FEATURES HTML
+========================================================= */
+
+function listToHTML(items) {
+
+  if (!Array.isArray(items)) {
+    return "";
+  }
+
+  return `
+    <ul class="result-list">
+      ${items
+        .map((item) => `<li>${escapeHTML(item)}</li>`)
+        .join("")}
+    </ul>
+  `;
+}
+
+
+/* =========================================================
+   RENDER RESULT
+========================================================= */
+
+function renderBlueprint(blueprint) {
+
+  const setText = (id, value) => {
+
+    const element = byId(id);
 
     if (element) {
-      element.textContent =
-        clean(value, "Not available.");
+      element.textContent = safeText(value);
     }
+
+  };
+
+
+  const setHTML = (id, value) => {
+
+    const element = byId(id);
+
+    if (element) {
+      element.innerHTML = value;
+    }
+
+  };
+
+
+  setText(
+    "resultHeading",
+    blueprint.title
+  );
+
+  setText(
+    "resSolution",
+    blueprint.solution
+  );
+
+  setText(
+    "resProblem",
+    blueprint.problem
+  );
+
+  setText(
+    "resValue",
+    blueprint.value
+  );
+
+  setText(
+    "resPrimaryCustomer",
+    blueprint.primaryCustomer
+  );
+
+  setText(
+    "resLocation",
+    blueprint.location
+  );
+
+  setText(
+    "resEarlyAdopters",
+    blueprint.earlyAdopters
+  );
+
+  setText(
+    "resBuyer",
+    blueprint.buyer
+  );
+
+  setHTML(
+    "resFeatures",
+    listToHTML(blueprint.features)
+  );
+
+  setText(
+    "resMvp",
+    blueprint.mvp
+  );
+
+  setText(
+    "resTech",
+    blueprint.tech
+  );
+
+  setText(
+    "resRevenuePrimary",
+    blueprint.revenuePrimary
+  );
+
+  setHTML(
+    "resRevenueAlternatives",
+    listToHTML(blueprint.revenueAlternatives)
+  );
+
+  setText(
+    "resPricing",
+    blueprint.pricing
+  );
+
+  setText(
+    "resMarketing",
+    blueprint.marketing
+  );
+
+  setText(
+    "resAcquisition",
+    blueprint.acquisition
+  );
+
+  setText(
+    "resBudget",
+    blueprint.budget
+  );
+
+  setText(
+    "resExperience",
+    blueprint.experience
+  );
+
+  setText(
+    "resEffort",
+    blueprint.effort
+  );
+
+  setHTML(
+    "resRisks",
+    listToHTML(blueprint.risks)
+  );
+
+  setHTML(
+    "resFirstActions",
+    listToHTML(blueprint.firstActions)
+  );
+
+  setText(
+    "resRoadmap30",
+    blueprint.roadmap30
+  );
+
+  setText(
+    "resRoadmap60",
+    blueprint.roadmap60
+  );
+
+  setText(
+    "resRoadmap90",
+    blueprint.roadmap90
+  );
+
+  setText(
+    "resRoadmap6",
+    blueprint.roadmap6
+  );
+
+  setText(
+    "resRoadmap12",
+    blueprint.roadmap12
+  );
+
+  setText(
+    "resRoadmapLong",
+    blueprint.roadmapLong
+  );
+
+  setText(
+    "resGrowth",
+    blueprint.growth
+  );
+}
+
+
+/* =========================================================
+   BLUEPRINT GENERATOR
+========================================================= */
+
+function generateBlueprint(data) {
+
+  const profile =
+    BUSINESS_PROFILES[data.businessType] ||
+    BUSINESS_PROFILES.general;
+
+  const customer =
+    buildCustomer(data, profile);
+
+  const problem =
+    buildProblem(data, profile);
+
+  const solution =
+    buildSolution(data, profile);
+
+  const value =
+    buildValue(data, profile);
+
+  const roadmap =
+    buildRoadmap(data, profile);
+
+  const firstActions =
+    buildFirstActions(data, profile);
+
+  const titleBase =
+    data.businessIdea
+      ? data.businessIdea.slice(0, 70)
+      : `${profile.label} Business`;
+
+  return {
+
+    title:
+      `${profile.label} — Business Blueprint`,
+
+    solution,
+
+    problem,
+
+    value,
+
+    primaryCustomer:
+      customer,
+
+    location:
+      data.location,
+
+    earlyAdopters:
+      profile.earlyAdopters,
+
+    buyer:
+      profile.buyer,
+
+    features:
+      profile.features,
+
+    mvp:
+      profile.mvp,
+
+    tech:
+      profile.tech,
+
+    revenuePrimary:
+      profile.revenue,
+
+    revenueAlternatives:
+      profile.alternatives,
+
+    pricing:
+      buildPricing(data, profile),
+
+    marketing:
+      buildMarketing(data, profile),
+
+    acquisition:
+      buildAcquisition(data, profile),
+
+    budget:
+      buildBudget(data),
+
+    experience:
+      buildExperience(data),
+
+    effort:
+      buildEffort(data),
+
+    risks:
+      profile.risks,
+
+    firstActions,
+
+    roadmap30:
+      roadmap.roadmap30,
+
+    roadmap60:
+      roadmap.roadmap60,
+
+    roadmap90:
+      roadmap.roadmap90,
+
+    roadmap6:
+      roadmap.roadmap6,
+
+    roadmap12:
+      roadmap.roadmap12,
+
+    roadmapLong:
+      roadmap.roadmapLong,
+
+    growth:
+      buildGrowth(data, profile),
+
+    sourceIdea:
+      titleBase,
+
+    generatedAt:
+      new Date().toISOString()
+  };
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const BLUEPRINT_STORAGE_KEY =
+  "theaicraftify_latest_business_blueprint";
+
+function saveBlueprint(blueprint) {
+
+  try {
+
+    localStorage.setItem(
+      BLUEPRINT_STORAGE_KEY,
+      JSON.stringify(blueprint)
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Blueprint could not be saved.",
+      error
+    );
+
   }
 
+  window.latestBusinessBlueprint =
+    blueprint;
+}
 
-  function setList(id, items) {
-    const element =
-      document.getElementById(id);
+function loadBlueprint() {
 
-    if (!element) {
-      return;
+  try {
+
+    const saved =
+      localStorage.getItem(
+        BLUEPRINT_STORAGE_KEY
+      );
+
+    if (!saved) {
+      return null;
     }
 
-    element.innerHTML = "";
+    return JSON.parse(saved);
 
-    const safeItems =
-      Array.isArray(items)
-        ? items
-        : [items];
+  } catch (error) {
 
-    safeItems.forEach((item) => {
+    return null;
+  }
+}
 
-      const li =
-        document.createElement("li");
 
-      li.textContent =
-        clean(item);
+/* =========================================================
+   FORM VALIDATION
+========================================================= */
 
-      element.appendChild(li);
+function validateBlueprintForm(data) {
+
+  if (!data.businessIdea && !data.problem) {
+
+    if (businessIdeaInput) {
+      businessIdeaInput.focus();
+    }
+
+    alert(
+      "Please describe your business idea or the problem you want to solve."
+    );
+
+    return false;
+  }
+
+  return true;
+}
+
+
+/* =========================================================
+   SHOW / HIDE LOADING
+========================================================= */
+
+function showLoading() {
+
+  if (blueprintLoading) {
+    blueprintLoading.hidden = false;
+  }
+
+  if (blueprintResults) {
+    blueprintResults.hidden = true;
+  }
+}
+
+function hideLoading() {
+
+  if (blueprintLoading) {
+    blueprintLoading.hidden = true;
+  }
+}
+
+
+/* =========================================================
+   GENERATE FLOW
+========================================================= */
+
+async function runBlueprintGeneration() {
+
+  if (!blueprintForm) {
+    return;
+  }
+
+  const data =
+    collectBlueprintData();
+
+  if (!validateBlueprintForm(data)) {
+    return;
+  }
+
+  showLoading();
+
+  await wait(900);
+
+  const blueprint =
+    generateBlueprint(data);
+
+  saveBlueprint(blueprint);
+
+  renderBlueprint(blueprint);
+
+  hideLoading();
+
+  if (blueprintResults) {
+    blueprintResults.hidden = false;
+
+    blueprintResults.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
     });
   }
+}
 
 
-  function setOrderedList(id, items) {
-    setList(id, items);
-  }
+/* =========================================================
+   FORM SUBMIT
+========================================================= */
+
+if (blueprintForm) {
+
+  blueprintForm.addEventListener(
+    "submit",
+    async (event) => {
+
+      event.preventDefault();
+
+      await runBlueprintGeneration();
+
+    }
+  );
+
+}
 
 
-  function scrollToBlueprint() {
-    const section =
-      document.getElementById("blueprint-engine");
+/* =========================================================
+   EXAMPLE CHIPS
+========================================================= */
 
-    if (section) {
-      section.scrollIntoView({
+$$(".example-chip").forEach((chip) => {
+
+  chip.addEventListener("click", () => {
+
+    const example =
+      safeText(
+        chip.getAttribute("data-example")
+      );
+
+    if (!example) return;
+
+    if (businessIdeaInput) {
+      businessIdeaInput.value = example;
+    }
+
+    const detected =
+      detectBusinessType(example);
+
+    if (
+      businessTypeInput &&
+      BUSINESS_PROFILES[detected]
+    ) {
+      businessTypeInput.value = detected;
+    }
+
+    if (problemInput && !problemInput.value) {
+
+      problemInput.value =
+        `Customers need a better, more convenient solution related to: ${example}`;
+
+    }
+
+    if (blueprintForm) {
+
+      blueprintForm.scrollIntoView({
         behavior: "smooth",
         block: "start"
       });
-    }
-  }
 
-
-  /* =========================================================
-     7. BUSINESS PROFILES
-  ========================================================= */
-
-  const BUSINESS_PROFILES = {
-
-    restaurant: {
-      keywords: [
-        "restaurant",
-        "cafe",
-        "café",
-        "food",
-        "bakery",
-        "cloud kitchen",
-        "food business",
-        "eatery"
-      ],
-
-      label: "Food Business",
-
-      solution:
-        "Build a focused food business around one clear customer segment and a small, repeatable menu. Start with a tightly defined offer, validate demand locally, then improve operations and expand the menu only after the first repeat customers appear.",
-
-      value:
-        "Customers get a convenient, trustworthy food option with a clear reason to choose the business instead of a generic alternative.",
-
-      features: [
-        "Focused menu built around a small number of profitable items",
-        "Simple ordering and enquiry flow",
-        "Digital menu with strong product photos",
-        "WhatsApp or direct-order customer channel",
-        "Customer feedback and repeat-order tracking",
-        "Basic loyalty or repeat-purchase system"
-      ],
-
-      tech: [
-        "Responsive website",
-        "HTML / CSS / JavaScript",
-        "WhatsApp Business",
-        "Google Business Profile",
-        "Simple analytics"
-      ],
-
-      revenue:
-        "Primary revenue should come from direct food and beverage sales, with the strongest focus on repeat customers and profitable items.",
-
-      alternatives: [
-        "Meal subscriptions",
-        "Corporate / office orders",
-        "Party or event catering",
-        "Delivery partnerships",
-        "Premium bundles"
-      ],
-
-      pricing:
-        "Start with competitive entry pricing while protecting gross margin. Track ingredient cost, packaging, delivery and wastage before deciding which products deserve promotion.",
-
-      marketing:
-        "Use local discovery, short-form food content, customer reviews, Google Business Profile, WhatsApp updates and partnerships with nearby communities or offices.",
-
-      acquisition:
-        "Begin with a small geographic area. Use sampling, referral offers, local social content, Google discovery and direct outreach to nearby offices, apartments and communities.",
-
-      risks: [
-        "Low repeat purchase rate",
-        "High food or packaging costs",
-        "Too many menu items",
-        "Delivery margin pressure",
-        "Weak local differentiation"
-      ]
-    },
-
-
-    clothing: {
-      keywords: [
-        "clothing",
-        "fashion",
-        "apparel",
-        "streetwear",
-        "garment",
-        "clothes",
-        "fashion brand",
-        "clothing brand"
-      ],
-
-      label: "Clothing Brand",
-
-      solution:
-        "Build a focused clothing brand around a specific style, audience or use case rather than trying to sell everything. Start with a small collection and validate which designs customers actually want.",
-
-      value:
-        "Customers get clothing that matches a specific identity, aesthetic or need instead of choosing from a generic catalogue.",
-
-      features: [
-        "Focused first collection",
-        "Mobile-first product catalogue",
-        "High-quality product photography",
-        "Size and fit information",
-        "Simple checkout or enquiry flow",
-        "Customer reviews",
-        "Social media product discovery"
-      ],
-
-      tech: [
-        "Responsive storefront",
-        "HTML / CSS / JavaScript",
-        "Payment / commerce platform",
-        "Instagram / social commerce",
-        "Analytics"
-      ],
-
-      revenue:
-        "Primary revenue comes from product sales, with margin driven by product selection, sourcing, pricing and repeat customers.",
-
-      alternatives: [
-        "Limited drops",
-        "Bundles",
-        "Memberships",
-        "Custom products",
-        "Wholesale"
-      ],
-
-      pricing:
-        "Calculate landed product cost first, then include packaging, payment fees, marketing and returns before setting retail pricing.",
-
-      marketing:
-        "Use short-form video, creator collaborations, customer-generated content, visual storytelling and niche communities.",
-
-      acquisition:
-        "Start with one narrow audience and use organic social content, micro-creators, referrals and limited product drops to create early demand.",
-
-      risks: [
-        "Inventory risk",
-        "Weak differentiation",
-        "High return rates",
-        "Poor product photography",
-        "Cash tied up in unsold stock"
-      ]
-    },
-
-
-    school: {
-      keywords: [
-        "school",
-        "education",
-        "tuition",
-        "coaching",
-        "academy",
-        "learning",
-        "training institute",
-        "classes"
-      ],
-
-      label: "Education Business",
-
-      solution:
-        "Build a focused learning service around a specific learner, outcome and curriculum. Start with one programme and prove that students achieve a useful result before expanding.",
-
-      value:
-        "Learners receive a structured path toward a specific outcome instead of scattered educational content.",
-
-      features: [
-        "Focused curriculum",
-        "Student onboarding",
-        "Progress tracking",
-        "Assignments or practice",
-        "Teacher / mentor support",
-        "Parent or learner communication",
-        "Outcome tracking"
-      ],
-
-      tech: [
-        "Responsive website",
-        "Learning management workflow",
-        "Forms",
-        "Video meeting tools",
-        "WhatsApp communication",
-        "Analytics"
-      ],
-
-      revenue:
-        "Primary revenue should come from paid programmes, classes or subscriptions.",
-
-      alternatives: [
-        "Workshops",
-        "Recorded courses",
-        "Tutoring",
-        "Corporate training",
-        "Study materials"
-      ],
-
-      pricing:
-        "Price around the measurable outcome and delivery effort. Offer a clear entry product before creating expensive long-term programmes.",
-
-      marketing:
-        "Use educational content, demonstrations, testimonials, referrals, local search and free introductory sessions.",
-
-      acquisition:
-        "Use referrals, local communities, educational content, partnerships and targeted outreach to parents, students or organisations.",
-
-      risks: [
-        "Low student retention",
-        "Unclear learning outcomes",
-        "Heavy founder involvement",
-        "Weak differentiation",
-        "Inconsistent delivery quality"
-      ]
-    },
-
-
-    salon: {
-      keywords: [
-        "salon",
-        "beauty",
-        "barber",
-        "spa",
-        "parlour",
-        "parlor",
-        "beauty salon"
-      ],
-
-      label: "Beauty / Personal Care",
-
-      solution:
-        "Build a local beauty service around a clear service menu, easy booking and repeat visits. Focus on customer experience and retention before expanding the service range.",
-
-      value:
-        "Customers get a convenient, trustworthy local service with simple booking and consistent quality.",
-
-      features: [
-        "Service catalogue",
-        "Booking / enquiry flow",
-        "Price list",
-        "Location and opening hours",
-        "Before / after portfolio",
-        "Customer reviews",
-        "Repeat-visit reminders"
-      ],
-
-      tech: [
-        "Responsive website",
-        "Booking system",
-        "Google Business Profile",
-        "WhatsApp Business",
-        "Social media"
-      ],
-
-      revenue:
-        "Primary revenue comes from service appointments and repeat customers.",
-
-      alternatives: [
-        "Membership packages",
-        "Premium treatments",
-        "Retail products",
-        "Home services",
-        "Gift cards"
-      ],
-
-      pricing:
-        "Use service-level costing and local competitor research. Create clear entry, standard and premium options where appropriate.",
-
-      marketing:
-        "Use before/after content, reviews, local discovery, referrals, social media and limited-time introductory offers.",
-
-      acquisition:
-        "Focus on a small radius using Google, Instagram, referrals, local partnerships and WhatsApp.",
-
-      risks: [
-        "Low repeat rate",
-        "Appointment cancellations",
-        "Staff dependency",
-        "Weak local visibility",
-        "Inconsistent service quality"
-      ]
-    },
-
-
-    agency: {
-      keywords: [
-        "agency",
-        "digital agency",
-        "marketing agency",
-        "web agency",
-        "creative agency",
-        "development agency"
-      ],
-
-      label: "Service Agency",
-
-      solution:
-        "Start with one specialised service for one clear customer segment. Productise the service into a repeatable offer instead of accepting every possible project.",
-
-      value:
-        "Clients get a focused outcome without needing to hire a full internal team.",
-
-      features: [
-        "Clear service package",
-        "Portfolio / proof",
-        "Lead capture",
-        "Discovery process",
-        "Proposal template",
-        "Delivery workflow",
-        "Client reporting"
-      ],
-
-      tech: [
-        "Website",
-        "HTML / CSS / JavaScript",
-        "AI-assisted workflows",
-        "CRM or spreadsheet",
-        "Automation tools",
-        "Analytics"
-      ],
-
-      revenue:
-        "Primary revenue comes from project fees or recurring retainers for a clearly defined service.",
-
-      alternatives: [
-        "Maintenance retainers",
-        "Consulting",
-        "Training",
-        "Templates",
-        "Productised services"
-      ],
-
-      pricing:
-        "Package the service around a defined outcome and scope. Avoid pricing only by hours once the workflow becomes repeatable.",
-
-      marketing:
-        "Use case studies, educational content, targeted outreach, referrals, communities and direct prospecting.",
-
-      acquisition:
-        "Choose one niche and contact relevant prospects with a specific problem-focused offer.",
-
-      risks: [
-        "Too many services",
-        "Unclear positioning",
-        "Inconsistent leads",
-        "Scope creep",
-        "Founder becoming the bottleneck"
-      ]
-    },
-
-
-    shop: {
-      keywords: [
-        "shop",
-        "store",
-        "retail",
-        "online store",
-        "ecommerce",
-        "e-commerce",
-        "product store"
-      ],
-
-      label: "Retail / E-commerce",
-
-      solution:
-        "Start with a focused product category and a small catalogue. Validate which products sell before investing heavily in inventory.",
-
-      value:
-        "Customers get a convenient way to discover and purchase a focused range of relevant products.",
-
-      features: [
-        "Focused product catalogue",
-        "Product search",
-        "Clear pricing",
-        "Product photography",
-        "Order / enquiry flow",
-        "Reviews",
-        "Customer support"
-      ],
-
-      tech: [
-        "Responsive storefront",
-        "HTML / CSS / JavaScript",
-        "Commerce platform",
-        "Payment provider",
-        "Analytics"
-      ],
-
-      revenue:
-        "Primary revenue comes from product sales with margin managed through sourcing, pricing and inventory control.",
-
-      alternatives: [
-        "Bundles",
-        "Subscriptions",
-        "Wholesale",
-        "Private-label products",
-        "Memberships"
-      ],
-
-      pricing:
-        "Calculate product cost, shipping, payment fees, returns and marketing before deciding retail price.",
-
-      marketing:
-        "Use search, social content, product demonstrations, creators, referrals and customer-generated content.",
-
-      acquisition:
-        "Start with one product category and use content, search discovery, communities and targeted partnerships.",
-
-      risks: [
-        "Inventory risk",
-        "Low margins",
-        "High return rate",
-        "Supplier problems",
-        "Weak differentiation"
-      ]
-    },
-
-
-    realEstate: {
-      keywords: [
-        "real estate",
-        "property",
-        "properties",
-        "broker",
-        "realty",
-        "real estate agency"
-      ],
-
-      label: "Real Estate Business",
-
-      solution:
-        "Build a focused local property service around one area, property type or customer segment. The initial advantage should come from better lead handling, trustworthy information and faster follow-up.",
-
-      value:
-        "Buyers, sellers or renters get a more focused property discovery and support experience.",
-
-      features: [
-        "Property catalogue",
-        "Search and filtering",
-        "Lead capture",
-        "WhatsApp enquiry",
-        "Location information",
-        "Property verification workflow",
-        "Follow-up tracking"
-      ],
-
-      tech: [
-        "Responsive website",
-        "Property database",
-        "Lead form",
-        "WhatsApp Business",
-        "CRM / spreadsheet",
-        "Analytics"
-      ],
-
-      revenue:
-        "Revenue can come from transaction commissions, service fees or property marketing packages depending on the operating model.",
-
-      alternatives: [
-        "Property marketing",
-        "Lead generation",
-        "Management services",
-        "Consulting",
-        "Premium listings"
-      ],
-
-      pricing:
-        "Keep pricing transparent and tied to the service provided or transaction outcome.",
-
-      marketing:
-        "Use local SEO, property content, social media, community groups, referrals and direct relationships.",
-
-      acquisition:
-        "Own a small local market first rather than trying to cover an entire city immediately.",
-
-      risks: [
-        "Long sales cycles",
-        "Lead quality",
-        "Trust issues",
-        "Regulatory requirements",
-        "Dependency on inventory"
-      ]
-    },
-
-
-    manufacturing: {
-      keywords: [
-        "manufacturing",
-        "factory",
-        "manufacturer",
-        "industrial",
-        "production",
-        "manufacturing business"
-      ],
-
-      label: "Manufacturing Business",
-
-      solution:
-        "Start with one product or manufacturing capability where there is identifiable demand. Validate buyers, required specifications, minimum order quantities and unit economics before expanding production.",
-
-      value:
-        "Business customers receive a reliable product with predictable specifications, quality and delivery.",
-
-      features: [
-        "Product specification",
-        "Sample / prototype process",
-        "Quotation workflow",
-        "Production tracking",
-        "Quality control",
-        "Inventory tracking",
-        "B2B customer management"
-      ],
-
-      tech: [
-        "Business website",
-        "Quotation system",
-        "Inventory spreadsheet or software",
-        "CRM",
-        "Production tracking",
-        "Analytics"
-      ],
-
-      revenue:
-        "Primary revenue comes from product orders, ideally with repeat B2B customers and predictable production runs.",
-
-      alternatives: [
-        "Custom manufacturing",
-        "Private label",
-        "Wholesale",
-        "Contract manufacturing",
-        "Export"
-      ],
-
-      pricing:
-        "Price from complete unit economics including materials, labour, energy, wastage, packaging, logistics and overhead.",
-
-      marketing:
-        "Use B2B outreach, industry directories, trade networks, demonstrations, samples and relationship-driven selling.",
-
-      acquisition:
-        "Identify a narrow buyer profile and contact potential buyers directly with a clear product specification and sample offer.",
-
-      risks: [
-        "High initial capital",
-        "Quality problems",
-        "Production delays",
-        "Working-capital pressure",
-        "Customer concentration"
-      ]
-    },
-
-
-    exporter: {
-      keywords: [
-        "export",
-        "exporter",
-        "international trade",
-        "trading",
-        "import export",
-        "global trade"
-      ],
-
-      label: "Export / Trading Business",
-
-      solution:
-        "Start with one product category and one target international market. Validate buyer demand, compliance, logistics, margins and payment terms before scaling.",
-
-      value:
-        "International buyers get reliable access to a relevant product with clear specifications and dependable communication.",
-
-      features: [
-        "Product catalogue",
-        "Buyer enquiry system",
-        "Product specifications",
-        "Quotation workflow",
-        "Sample process",
-        "Documentation workflow",
-        "Order tracking"
-      ],
-
-      tech: [
-        "Business website",
-        "Digital catalogue",
-        "CRM",
-        "Email",
-        "Messaging",
-        "Spreadsheet / operations system"
-      ],
-
-      revenue:
-        "Primary revenue comes from product trading margins or export order margins.",
-
-      alternatives: [
-        "Private label",
-        "Sourcing services",
-        "Distribution",
-        "Wholesale",
-        "Commission-based trading"
-      ],
-
-      pricing:
-        "Calculate product, packaging, compliance, freight, insurance, payment and currency costs before quoting.",
-
-      marketing:
-        "Use B2B directories, targeted outreach, trade communities, referrals and product-specific content.",
-
-      acquisition:
-        "Build a list of relevant buyers in one target market and run systematic, personalised outreach.",
-
-      risks: [
-        "Compliance problems",
-        "Currency risk",
-        "Logistics delays",
-        "Buyer payment risk",
-        "Low initial trust"
-      ]
-    },
-
-
-    service: {
-      keywords: [
-        "service",
-        "consulting",
-        "freelance",
-        "repair",
-        "cleaning",
-        "maintenance",
-        "professional service"
-      ],
-
-      label: "Service Business",
-
-      solution:
-        "Turn a skill into a clearly packaged service for a specific customer type. Start with one offer, create a repeatable delivery process and collect proof from early customers.",
-
-      value:
-        "Customers get a specific problem solved without having to figure out the process themselves.",
-
-      features: [
-        "Clear service package",
-        "Simple landing page",
-        "Lead form",
-        "Booking or enquiry flow",
-        "Service process",
-        "Testimonials",
-        "Follow-up system"
-      ],
-
-      tech: [
-        "Responsive website",
-        "HTML / CSS / JavaScript",
-        "Forms",
-        "WhatsApp / email",
-        "Simple CRM",
-        "Automation"
-      ],
-
-      revenue:
-        "Primary revenue comes from service fees, packages or recurring retainers.",
-
-      alternatives: [
-        "Subscriptions",
-        "Maintenance plans",
-        "Consulting",
-        "Training",
-        "Digital products"
-      ],
-
-      pricing:
-        "Package the service around customer value and delivery effort. Use clear scope to prevent uncontrolled work.",
-
-      marketing:
-        "Use educational content, referrals, local search, communities, direct outreach and proof of results.",
-
-      acquisition:
-        "Start with a narrow customer profile and direct outreach. Turn successful projects into case studies.",
-
-      risks: [
-        "Inconsistent leads",
-        "Scope creep",
-        "Time-based income",
-        "Founder bottleneck",
-        "Weak differentiation"
-      ]
-    },
-
-
-    general: {
-      keywords: [],
-
-      label: "General Business",
-
-      solution:
-        "Start with a narrow version of the idea that solves one clear customer problem. Validate demand before building a large product or investing heavily.",
-
-      value:
-        "Customers get a focused solution to a real problem with less complexity than trying to serve everyone.",
-
-      features: [
-        "Clear core offer",
-        "Simple landing page",
-        "Customer enquiry flow",
-        "Basic onboarding",
-        "Feedback collection",
-        "Simple analytics"
-      ],
-
-      tech: [
-        "Responsive website",
-        "HTML / CSS / JavaScript",
-        "Forms",
-        "Analytics",
-        "Simple automation"
-      ],
-
-      revenue:
-        "Choose one primary revenue model that is easy for customers to understand and easy for you to deliver.",
-
-      alternatives: [
-        "Subscriptions",
-        "One-time purchases",
-        "Service packages",
-        "Licensing",
-        "Consulting"
-      ],
-
-      pricing:
-        "Start with a simple price that reflects customer value and your delivery costs. Test pricing with real customers rather than assuming the perfect number.",
-
-      marketing:
-        "Create useful content around the customer problem and build trust before aggressively selling.",
-
-      acquisition:
-        "Start with direct outreach, referrals, communities, search and relevant social content.",
-
-      risks: [
-        "Building before validating",
-        "Unclear target customer",
-        "Weak differentiation",
-        "Poor pricing",
-        "Trying to serve everyone"
-      ]
-    }
-  };
-
-
-  /* =========================================================
-     8. CATEGORY DETECTION
-  ========================================================= */
-
-  function detectBusinessCategory(businessType) {
-
-    const value =
-      normalize(businessType);
-
-    if (!value) {
-      return "general";
     }
 
-
-    for (const [category, profile]
-      of Object.entries(BUSINESS_PROFILES)) {
-
-      if (category === "general") {
-        continue;
-      }
-
-      const found =
-        profile.keywords.some((keyword) =>
-          value.includes(
-            normalize(keyword)
-          )
-        );
-
-      if (found) {
-        return category;
-      }
-    }
-
-
-    return "general";
-  }
-
-
-  /* =========================================================
-     9. INPUT DATA
-  ========================================================= */
-
-  function getBlueprintInput() {
-
-    return {
-      businessType:
-        clean(
-          businessTypeInput?.value
-        ),
-
-      problem:
-        clean(
-          problemInput?.value
-        ),
-
-      customers:
-        clean(
-          customersInput?.value
-        ),
-
-      location:
-        clean(
-          locationInput?.value,
-          "Local / Online"
-        ),
-
-      budget:
-        clean(
-          budgetInput?.value,
-          "low"
-        ),
-
-      goal:
-        clean(
-          goalInput?.value,
-          "income"
-        ),
-
-      experience:
-        clean(
-          experienceInput?.value,
-          "beginner"
-        )
-    };
-  }
-
-
-  /* =========================================================
-     10. ADAPTIVE CONTENT
-  ========================================================= */
-
-  function customerText(input, profile) {
-
-    if (input.customers) {
-      return input.customers;
-    }
-
-    const defaults = {
-      restaurant:
-        "Local customers, nearby families, office workers and repeat food buyers.",
-
-      clothing:
-        "A focused group of fashion-conscious customers who identify with the brand's style.",
-
-      school:
-        "Students, parents or professionals looking for a specific learning outcome.",
-
-      salon:
-        "Local customers who value convenience, trust and repeat personal-care services.",
-
-      agency:
-        "Small businesses and founders who need a specialised service but do not want a full internal team.",
-
-      shop:
-        "Customers actively looking for products within the chosen category.",
-
-      realEstate:
-        "Local buyers, sellers, landlords or renters depending on the selected property niche.",
-
-      manufacturing:
-        "Businesses that regularly purchase the product or component being manufactured.",
-
-      exporter:
-        "International B2B buyers looking for reliable suppliers in the chosen product category.",
-
-      service:
-        "Customers or businesses experiencing the specific problem your service solves.",
-
-      general:
-        "A clearly defined group of customers who repeatedly experience the problem."
-    };
-
-    return defaults[detectBusinessCategory(input.businessType)]
-      || defaults.general;
-  }
-
-
-  function generateProblem(input) {
-
-    if (input.problem) {
-      return input.problem;
-    }
-
-    return `Customers in ${input.location || "the target market"} may currently have difficulty finding a reliable, convenient and clearly differentiated solution for ${input.businessType || "this business idea"}.`;
-  }
-
-
-  function generateEarlyAdopters(input, profile) {
-
-    const customer =
-      customerText(input, profile);
-
-    return `Start with a small group of customers most likely to feel the problem strongly. For this idea, that means ${customer.toLowerCase()} Focus first on people who already spend money trying to solve the problem.`;
-  }
-
-
-  function generateBuyer(input, profile) {
-
-    if (input.customers) {
-      return `The initial buyer should be the person or organisation represented by "${input.customers}". Confirm who actually controls the purchase decision before building the full offer.`;
-    }
-
-    return `Identify the person who directly experiences the problem and has the authority or willingness to pay for the solution. For this ${profile.label.toLowerCase()}, keep the first buyer profile narrow enough to target directly.`;
-  }
-
-
-  function generateMVP(input, profile) {
-
-    const business =
-      input.businessType || profile.label;
-
-    const goalText = {
-      income:
-        "The MVP should prove that customers will pay.",
-
-      local:
-        "The MVP should prove local demand and repeat usage.",
-
-      online:
-        "The MVP should prove online acquisition and conversion.",
-
-      startup:
-        "The MVP should prove a repeatable problem-solution fit before scaling.",
-
-      freelance:
-        "The MVP should prove that the service can be sold and delivered consistently."
-    };
-
-    return `For ${business}, build only the smallest version that can deliver the core customer outcome. ${goalText[input.goal] || goalText.income} Do not build secondary features until real users provide evidence that they are needed.`;
-  }
-
-
-  function generateEffort(input, profile) {
-
-    const effortMap = {
-      low:
-        "Start lean. Focus on validation, a simple offer and a lightweight MVP before spending heavily.",
-
-      medium:
-        "A moderate build-and-test cycle is realistic. Invest in the parts that directly improve customer acquisition or delivery.",
-
-      high:
-        "A larger investment may be possible, but validate the core demand before committing the full budget."
-    };
-
-    return effortMap[input.budget]
-      || effortMap.low;
-  }
-
-
-  function generateTechnology(input, profile) {
-
-    const base =
-      profile.tech || [];
-
-    const experienceAddition = {
-      beginner:
-        "Prefer simple technologies you can understand and maintain yourself.",
-
-      intermediate:
-        "You can introduce more structured application architecture after the MVP is validated.",
-
-      advanced:
-        "Choose architecture based on scale, reliability, integration and maintainability requirements."
-    };
-
-    return [
-      ...base,
-      experienceAddition[input.experience] ||
-        experienceAddition.beginner
-    ];
-  }
-
-
-  function generatePricing(input, profile) {
-
-    let pricing =
-      profile.pricing;
-
-    if (input.budget === "low") {
-      pricing +=
-        " Keep the initial offer simple so you can test willingness to pay without requiring a large upfront investment.";
-    }
-
-    if (input.goal === "startup") {
-      pricing +=
-        " As the business proves demand, test pricing against retention, conversion and customer acquisition cost.";
-    }
-
-    return pricing;
-  }
-
-
-  function generateMarketing(input, profile) {
-
-    let marketing =
-      profile.marketing;
-
-    if (input.location) {
-      marketing +=
-        ` For ${input.location}, adapt the channels to where your actual customers already spend time.`;
-    }
-
-    return marketing;
-  }
-
-
-  function generateAcquisition(input, profile) {
-
-    let acquisition =
-      profile.acquisition;
-
-    if (input.experience === "beginner") {
-      acquisition +=
-        " As a beginner, prioritise one or two acquisition channels rather than trying every platform simultaneously.";
-    }
-
-    return acquisition;
-  }
-
-
-  function generateRevenue(profile, input) {
-
-    let primary =
-      profile.revenue;
-
-    if (input.goal === "freelance") {
-      primary =
-        "Use a clearly packaged service with a defined scope, delivery process and price. Add recurring support only after the core service is proven.";
-    }
-
-    return {
-      primary,
-      alternatives:
-        profile.alternatives
-    };
-  }
-
-
-  /* =========================================================
-     11. ROADMAP ENGINE
-  ========================================================= */
-
-  function generateRoadmap(input, profile) {
-
-    const business =
-      input.businessType || profile.label;
-
-    const location =
-      input.location || "the target market";
-
-    return {
-
-      day30:
-        `Days 0–30: Validate ${business} in ${location}. Interview potential customers, study existing alternatives, define one narrow customer segment, test the core offer and identify what people are already willing to pay for. Do not overbuild.`,
-
-      day60:
-        `Days 31–60: Build the smallest usable MVP for ${business}. Create the core customer experience, basic brand or landing page, essential operations and a simple way to capture feedback and measure demand.`,
-
-      day90:
-        `Days 61–90: Launch to a controlled group of real customers. Focus on first transactions, delivery quality, customer feedback and evidence of repeat demand rather than vanity metrics.`,
-
-      month6:
-        `3–6 months: Improve the offer using real customer behaviour. Build repeatable acquisition, improve operations, document the process and aim for a predictable flow of customers and revenue.`,
-
-      month12:
-        `6–12 months: Strengthen unit economics, retention, positioning and delivery. Remove unnecessary work, automate repetitive processes and expand only the parts that show reliable demand.`,
-
-      longTerm:
-        `12+ months: Scale the proven model. Consider additional products, locations, customer segments, partnerships, technology, team hiring or automation only when the core business model is working consistently.`
-    };
-  }
-
-
-  /* =========================================================
-     12. GROWTH ENGINE
-  ========================================================= */
-
-  function generateGrowth(input, profile) {
-
-    const business =
-      input.businessType || profile.label;
-
-    return `Long-term growth for ${business} should follow evidence rather than assumptions: first prove the customer problem, then prove willingness to pay, then create a repeatable acquisition channel, improve margins and retention, and only then expand products, geography, team or technology.`;
-  }
-
-
-  /* =========================================================
-     13. FULL BLUEPRINT
-  ========================================================= */
-
-  function generateBusinessBlueprint(input) {
-
-    const category =
-      detectBusinessCategory(
-        input.businessType
-      );
-
-    const profile =
-      BUSINESS_PROFILES[category] ||
-      BUSINESS_PROFILES.general;
-
-
-    const revenue =
-      generateRevenue(
-        profile,
-        input
-      );
-
-
-    const roadmap =
-      generateRoadmap(
-        input,
-        profile
-      );
-
-
-    return {
-
-      category,
-
-      heading:
-        `${input.businessType || profile.label} — Business Blueprint`,
-
-      solution:
-        profile.solution,
-
-      problem:
-        generateProblem(input),
-
-      value:
-        profile.value,
-
-      primaryCustomer:
-        customerText(
-          input,
-          profile
-        ),
-
-      location:
-        input.location ||
-        "Local / Online",
-
-      earlyAdopters:
-        generateEarlyAdopters(
-          input,
-          profile
-        ),
-
-      buyer:
-        generateBuyer(
-          input,
-          profile
-        ),
-
-      features:
-        profile.features,
-
-      mvp:
-        generateMVP(
-          input,
-          profile
-        ),
-
-      tech:
-        generateTechnology(
-          input,
-          profile
-        ),
-
-      revenuePrimary:
-        revenue.primary,
-
-      revenueAlternatives:
-        revenue.alternatives,
-
-      pricing:
-        generatePricing(
-          input,
-          profile
-        ),
-
-      marketing:
-        generateMarketing(
-          input,
-          profile
-        ),
-
-      acquisition:
-        generateAcquisition(
-          input,
-          profile
-        ),
-
-      budget:
-        `Budget level: ${input.budget}. Start by spending only on activities that directly validate demand, improve delivery or acquire customers. Avoid major fixed costs before validation.`,
-
-      experience:
-        `Experience level: ${input.experience}. The first version should match your current ability. Use AI-assisted development and simple tools where they reduce complexity without hiding how the system works.`,
-
-      effort:
-        generateEffort(
-          input,
-          profile
-        ),
-
-      risks:
-        profile.risks,
-
-      firstActions: [
-        "Write the one-sentence customer problem.",
-        "Choose one narrow customer segment.",
-        "Interview or speak with at least 5 potential customers.",
-        "Study 3–5 existing alternatives.",
-        "Create the smallest testable offer.",
-        "Ask for real commitment, payment, booking or sign-up.",
-        "Record the evidence and revise the plan."
-      ],
-
-      roadmap30:
-        roadmap.day30,
-
-      roadmap60:
-        roadmap.day60,
-
-      roadmap90:
-        roadmap.day90,
-
-      roadmap6:
-        roadmap.month6,
-
-      roadmap12:
-        roadmap.month12,
-
-      roadmapLong:
-        roadmap.longTerm,
-
-      growth:
-        generateGrowth(
-          input,
-          profile
-        )
-    };
-  }
-
-
-  /* =========================================================
-     14. RENDER BLUEPRINT
-  ========================================================= */
-
-  function renderBlueprint(blueprint) {
-
-    setText(
-      "resultHeading",
-      blueprint.heading
-    );
-
-    setText(
-      "resSolution",
-      blueprint.solution
-    );
-
-    setText(
-      "resProblem",
-      blueprint.problem
-    );
-
-    setText(
-      "resValue",
-      blueprint.value
-    );
-
-    setText(
-      "resPrimaryCustomer",
-      blueprint.primaryCustomer
-    );
-
-    setText(
-      "resLocation",
-      blueprint.location
-    );
-
-    setText(
-      "resEarlyAdopters",
-      blueprint.earlyAdopters
-    );
-
-    setText(
-      "resBuyer",
-      blueprint.buyer
-    );
-
-    setList(
-      "resFeatures",
-      blueprint.features
-    );
-
-    setText(
-      "resMvp",
-      blueprint.mvp
-    );
-
-    setList(
-      "resTech",
-      blueprint.tech
-    );
-
-    setText(
-      "resRevenuePrimary",
-      blueprint.revenuePrimary
-    );
-
-    setList(
-      "resRevenueAlternatives",
-      blueprint.revenueAlternatives
-    );
-
-    setText(
-      "resPricing",
-      blueprint.pricing
-    );
-
-    setText(
-      "resMarketing",
-      blueprint.marketing
-    );
-
-    setText(
-      "resAcquisition",
-      blueprint.acquisition
-    );
-
-    setText(
-      "resBudget",
-      blueprint.budget
-    );
-
-    setText(
-      "resExperience",
-      blueprint.experience
-    );
-
-    setText(
-      "resEffort",
-      blueprint.effort
-    );
-
-    setList(
-      "resRisks",
-      blueprint.risks
-    );
-
-    setOrderedList(
-      "resFirstActions",
-      blueprint.firstActions
-    );
-
-    setText(
-      "resRoadmap30",
-      blueprint.roadmap30
-    );
-
-    setText(
-      "resRoadmap60",
-      blueprint.roadmap60
-    );
-
-    setText(
-      "resRoadmap90",
-      blueprint.roadmap90
-    );
-
-    setText(
-      "resRoadmap6",
-      blueprint.roadmap6
-    );
-
-    setText(
-      "resRoadmap12",
-      blueprint.roadmap12
-    );
-
-    setText(
-      "resRoadmapLong",
-      blueprint.roadmapLong
-    );
-
-    setText(
-      "resGrowth",
-      blueprint.growth
-    );
-
-
-    if (blueprintResults) {
-      blueprintResults.hidden = false;
-    }
-
-
-    if (blueprintLoading) {
-      blueprintLoading.hidden = true;
-    }
-
-
-    window.latestBusinessBlueprint =
-      blueprint;
-  }
-
-
-  /* =========================================================
-     15. GENERATION
-  ========================================================= */
-
-  let lastInput = null;
-
-
-  function runBlueprintGeneration(
-    shouldScroll = true
-  ) {
-
-    if (!blueprintForm) {
-      return;
-    }
-
-
-    const input =
-      getBlueprintInput();
-
-
-    if (!input.businessType) {
-
-      if (businessTypeInput) {
-        businessTypeInput.focus();
-      }
-
-      return;
-    }
-
-
-    lastInput = {
-      ...input
-    };
-
-
-    if (blueprintLoading) {
-      blueprintLoading.hidden = false;
-    }
-
-
-    if (blueprintResults) {
-      blueprintResults.hidden = true;
-    }
-
-
-    if (shouldScroll) {
-      scrollToBlueprint();
-    }
-
-
-    window.setTimeout(() => {
-
-      const blueprint =
-        generateBusinessBlueprint(
-          input
-        );
-
-      renderBlueprint(
-        blueprint
-      );
-
-    }, 650);
-  }
-
-
-  /* =========================================================
-     16. FORM SUBMIT
-  ========================================================= */
-
-  if (blueprintForm) {
-
-    blueprintForm.addEventListener(
-      "submit",
-      (event) => {
-
-        event.preventDefault();
-
-        runBlueprintGeneration(true);
-      }
-    );
-  }
-
-
-  /* =========================================================
-     17. EXAMPLE CHIPS
-  ========================================================= */
-
-  const exampleChips =
-    document.querySelectorAll(
-      ".example-chip"
-    );
-
-
-  exampleChips.forEach((chip) => {
-
-    chip.addEventListener(
-      "click",
-      () => {
-
-        const example =
-          chip.dataset.example;
-
-        if (!businessTypeInput) {
-          return;
-        }
-
-        businessTypeInput.value =
-          example;
-
-        businessTypeInput.focus();
-
-        const category =
-          detectBusinessCategory(
-            example
-          );
-
-
-        const exampleProblems = {
-
-          restaurant:
-            "People want convenient, trustworthy food with consistent quality and easy ordering.",
-
-          clothing:
-            "Customers struggle to find clothing that matches their specific style and identity.",
-
-          salon:
-            "Local customers want convenient booking and a reliable personal-care experience.",
-
-          "digital agency":
-            "Small businesses need specialised digital work without hiring a full internal team.",
-
-          "online store":
-            "Customers want a convenient way to discover and purchase relevant products online.",
-
-          "real estate":
-            "Buyers and sellers need trustworthy property information and faster follow-up."
-        };
-
-
-        const selectedProblem =
-          exampleProblems[example];
-
-
-        if (
-          selectedProblem &&
-          problemInput &&
-          !problemInput.value.trim()
-        ) {
-          problemInput.value =
-            selectedProblem;
-        }
-
-
-        if (
-          category !== "general" &&
-          customersInput &&
-          !customersInput.value.trim()
-        ) {
-          const customerDefaults = {
-
-            restaurant:
-              "Local families, office workers and nearby food customers.",
-
-            clothing:
-              "Fashion-conscious customers in a focused niche.",
-
-            salon:
-              "Local customers who regularly purchase beauty or personal-care services.",
-
-            agency:
-              "Small businesses and founders.",
-
-            shop:
-              "Customers actively searching for products in the selected category.",
-
-            realEstate:
-              "Local buyers, sellers, landlords and renters."
-          };
-
-
-          if (customerDefaults[category]) {
-            customersInput.value =
-              customerDefaults[category];
-          }
-        }
-      }
-    );
   });
-
-
-  /* =========================================================
-     18. REGENERATE
-  ========================================================= */
-
-  if (regenerateBtn) {
-
-    regenerateBtn.addEventListener(
-      "click",
-      () => {
-
-        if (!lastInput) {
-          runBlueprintGeneration(false);
-          return;
-        }
-
-
-        if (blueprintLoading) {
-          blueprintLoading.hidden = false;
-        }
-
-        if (blueprintResults) {
-          blueprintResults.hidden = true;
-        }
-
-
-        window.setTimeout(() => {
-
-          const blueprint =
-            generateBusinessBlueprint(
-              lastInput
-            );
-
-          renderBlueprint(
-            blueprint
-          );
-
-        }, 500);
-      }
-    );
-  }
-
-
-  /* =========================================================
-     19. NEW IDEA
-  ========================================================= */
-
-  if (newIdeaBtn) {
-
-    newIdeaBtn.addEventListener(
-      "click",
-      () => {
-
-        if (blueprintForm) {
-          blueprintForm.reset();
-        }
-
-        lastInput = null;
-
-        if (blueprintResults) {
-          blueprintResults.hidden = true;
-        }
-
-        if (blueprintLoading) {
-          blueprintLoading.hidden = true;
-        }
-
-        if (businessTypeInput) {
-          businessTypeInput.focus();
-        }
-
-        scrollToBlueprint();
-      }
-    );
-  }
-
-
-  /* =========================================================
-     20. OPEN BLUEPRINT BUTTON
-  ========================================================= */
-
-  const blueprintOpenButtons =
-    document.querySelectorAll(
-      '[data-role="open-blueprint"]'
-    );
-
-
-  blueprintOpenButtons.forEach((button) => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        window.setTimeout(() => {
-
-          if (businessTypeInput) {
-            businessTypeInput.focus();
-          }
-
-        }, 500);
-      }
-    );
-  });
-
-
-  /* =========================================================
-     21. PUBLIC API
-     Useful later for future features.
-  ========================================================= */
-
-  window.TheAICraftifyBlueprint = {
-
-    generate:
-      generateBusinessBlueprint,
-
-    detectCategory:
-      detectBusinessCategory,
-
-    render:
-      renderBlueprint
-
-  };
-
-
-  /* =========================================================
-     22. READY LOG
-  ========================================================= */
-
-  console.log(
-    "TheAIcraftify portfolio + Business Blueprint Engine loaded."
-  );
 
 });
+
+
+/* =========================================================
+   REGENERATE
+========================================================= */
+
+const regenerateBtn =
+  byId("regenerateBtn");
+
+if (regenerateBtn) {
+
+  regenerateBtn.addEventListener(
+    "click",
+    async () => {
+
+      await runBlueprintGeneration();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   NEW IDEA
+========================================================= */
+
+const newIdeaBtn =
+  byId("newIdeaBtn");
+
+if (newIdeaBtn) {
+
+  newIdeaBtn.addEventListener(
+    "click",
+    () => {
+
+      if (blueprintForm) {
+        blueprintForm.reset();
+      }
+
+      if (blueprintResults) {
+        blueprintResults.hidden = true;
+      }
+
+      if (blueprintLoading) {
+        blueprintLoading.hidden = true;
+      }
+
+      if (blueprintForm) {
+
+        blueprintForm.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      }
+
+      if (businessIdeaInput) {
+        setTimeout(() => {
+          businessIdeaInput.focus();
+        }, 500);
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   OPEN BLUEPRINT BUTTONS
+========================================================= */
+
+$$('[data-role="open-blueprint"]').forEach((button) => {
+
+  button.addEventListener("click", () => {
+
+    setTimeout(() => {
+
+      const input =
+        byId("businessIdea");
+
+      if (input) {
+        input.focus({
+          preventScroll: true
+        });
+      }
+
+    }, 700);
+
+  });
+
+});
+
+
+/* =========================================================
+   RESTORE LAST BLUEPRINT
+========================================================= */
+
+function restoreLastBlueprint() {
+
+  const saved =
+    loadBlueprint();
+
+  if (!saved) {
+    return;
+  }
+
+  window.latestBusinessBlueprint =
+    saved;
+
+  /*
+    We intentionally do not automatically show
+    old results on every page load.
+    The portfolio opens cleanly, while the latest
+    blueprint remains available in localStorage.
+  */
+}
+
+restoreLastBlueprint();
+
+
+/* =========================================================
+   INTERSECTION OBSERVER
+========================================================= */
+
+function setupRevealObserver() {
+
+  const elements = $(
+    ".section-heading, .roadmap-card, .project-card, " +
+    ".skill-card, .learning-card, .journey-card, " +
+    ".contact-card, .future-goal"
+  );
+
+  if (!elements.length) {
+    return;
+  }
+
+  if (
+    !("IntersectionObserver" in window)
+  ) {
+    return;
+  }
+
+  const observer =
+    new IntersectionObserver(
+      (entries) => {
+
+        entries.forEach((entry) => {
+
+          if (
+            entry.isIntersecting
+          ) {
+
+            entry.target.classList.add(
+              "is-visible"
+            );
+
+            observer.unobserve(
+              entry.target
+            );
+
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.08
+      }
+    );
+
+  elements.forEach((element) => {
+
+    element.classList.add(
+      "reveal-ready"
+    );
+
+    observer.observe(element);
+
+  });
+
+}
+
+setupRevealObserver();
+
+
+/* =========================================================
+   HERO TYPING EFFECT
+========================================================= */
+
+function setupHeroTyping() {
+
+  const kicker =
+    $(".hero-kicker");
+
+  if (!kicker) {
+    return;
+  }
+
+  const original =
+    kicker.textContent.trim();
+
+  if (!original) {
+    return;
+  }
+
+  if (
+    window.matchMedia &&
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+  ) {
+    return;
+  }
+
+  let index = 0;
+
+  kicker.textContent = "";
+
+  const typeNext = () => {
+
+    if (index >= original.length) {
+      return;
+    }
+
+    kicker.textContent +=
+      original.charAt(index);
+
+    index += 1;
+
+    setTimeout(
+      typeNext,
+      28
+    );
+
+  };
+
+  setTimeout(
+    typeNext,
+    500
+  );
+
+}
+
+setupHeroTyping();
+
+
+/* =========================================================
+   BLUEPRINT ENGINE PUBLIC API
+========================================================= */
+
+window.TheAICraftifyBlueprint = {
+
+  generate: generateBlueprint,
+
+  detectBusinessType,
+
+  getBusinessProfile(type) {
+    return (
+      BUSINESS_PROFILES[type] ||
+      BUSINESS_PROFILES.general
+    );
+  },
+
+  getLatest() {
+    return (
+      window.latestBusinessBlueprint ||
+      loadBlueprint()
+    );
+  }
+
+};
+
+
+/* =========================================================
+   DEBUG / READY
+========================================================= */
+
+console.log(
+  "TheAICraftify loaded successfully."
+);
+
+console.log(
+  "AI Business Blueprint Engine ready."
+);
